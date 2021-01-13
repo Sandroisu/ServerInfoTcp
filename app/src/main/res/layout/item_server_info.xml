@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="4dp"
+    android:background="@drawable/border_background"
+    android:elevation="4dp"
+    android:padding="4dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/item_server_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/normal_blue"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_server_net_info_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/item_server_ip">
+
+        <TextView
+            android:id="@+id/item_cpu_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cpu"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/item_server_cpu_info"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            app:layout_constraintEnd_toStartOf="@id/item_guideline_vertical"
+            app:layout_constraintTop_toBottomOf="@id/item_cpu_title"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/item_mem_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mem"
+            app:layout_constraintStart_toEndOf="@id/item_guideline_vertical"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/item_mem"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_guideline_vertical"
+            app:layout_constraintTop_toBottomOf="@id/item_mem_title"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/item_guideline_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.65" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/item_server_iotop"
+        android:layout_marginTop="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/item_server_net_info_block"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Информация о железе" />
+
+    <TextView
+        android:id="@+id/item_server_net"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/item_server_iotop"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Информация о psql" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

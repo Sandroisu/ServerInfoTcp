@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ServerInfoTCP</string>
+    <string name="reconnect">Подключится повторно</string>
+    <string name="send">Отправить</string>
+    <string name="time">Time</string>
+    <string name="mbits">MBits</string>
+    <string name="net">NET</string>
+    <string name="address_server">Адрес сервера</string>
+    <string name="port">Порт</string>
+    <string name="accept">Принять</string>
+    <string name="df">DF</string>
+    <string name="psql">PSQL</string>
+    <string name="cpu">CPU</string>
+    <string name="mem">MEM</string>
+    <string name="top">TOP</string>
+    <string name="level">Level</string>
+</resources>

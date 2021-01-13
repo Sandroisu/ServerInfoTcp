@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#76d275</color>
+    <color name="primary_dark">#43a047</color>
+    <color name="primary_ultra_dark">#00701a</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="normal_blue">#0091ea</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="hint">#D1D0D8</color>
+    <color name="error">#FF0000</color>
+</resources>

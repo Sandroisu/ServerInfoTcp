@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/da_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:textColor="@color/error"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Ошибка"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/da_reconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reconnect"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_error"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/da_net_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_reconnect">
+
+            <TextView
+                android:id="@+id/da_net_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/net"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/da_net_y_axis_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:rotation="-90"
+                android:text="@string/mbits"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/da_net"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                app:layout_constraintEnd_toStartOf="@id/da_net_x_axis_title"
+                app:layout_constraintStart_toEndOf="@id/da_net_y_axis_title"
+                app:layout_constraintTop_toBottomOf="@id/da_net_title" />
+
+            <TextView
+                android:id="@+id/da_net_x_axis_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/time"
+                app:layout_constraintBottom_toBottomOf="@id/da_net"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/da_top_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_net_block">
+
+            <TextView
+                android:id="@+id/da_top_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/top"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/da_top_common"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_top_title"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/da_load_average_y_axis_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:rotation="-90"
+                android:text="@string/level"
+                app:layout_constraintBottom_toBottomOf="@id/da_load_average"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/da_top_common" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/da_load_average"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toStartOf="@id/da_load_average_x_axis_title"
+                app:layout_constraintStart_toEndOf="@id/da_load_average_y_axis_title"
+                app:layout_constraintTop_toBottomOf="@id/da_top_common" />
+
+            <TextView
+                android:id="@+id/da_load_average_x_axis_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/time"
+                app:layout_constraintBottom_toBottomOf="@id/da_load_average"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_top_mem"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@id/da_top_guideline_horizontal"
+                app:layout_constraintEnd_toEndOf="@id/da_top_guideline_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_load_average" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_top_swap"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@id/da_top_guideline_horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/da_top_guideline_vertical"
+                app:layout_constraintTop_toBottomOf="@id/da_load_average" />
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/da_top_tasks"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/da_top_guideline_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_top_guideline_horizontal" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_top_cpu"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/da_top_guideline_vertical"
+                app:layout_constraintTop_toBottomOf="@id/da_top_swap" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/da_top_guideline_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/da_top_guideline_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.5" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/da_psql_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_top_block"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/da_psql_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/psql"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_psql"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_psql_title" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/da_df_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_psql_block"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/da_df_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/df"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_df"
+                android:layout_width="0dp"
+                android:layout_height="300dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_df_title" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
