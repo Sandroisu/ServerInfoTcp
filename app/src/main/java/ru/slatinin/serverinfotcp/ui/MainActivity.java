@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     }
 
     @Override
-    public void updateTcpInfo(SingleInfo info) {
+    public void updateTcpInfo(SingleInfo info, String dataInfo) {
         runOnUiThread(() ->
 
                 serverInfoAdapter.notifyDataSetChanged());

@@ -26,18 +26,8 @@ public class SingleInfo {
     private ServerDFList serverDFList;
     private ServerIoTopList serverIoTopList;
     private ServerTOP serverTOP;
-
-    public List<ServerPSQL> getTempPSQLList() {
-        return tempPSQLList;
-    }
-
     private List<ServerPSQL> tempPSQLList;
-
-    public List<List<ServerPSQL>> getServerPsqlLists() {
-        return serverPsqlLists;
-    }
-
-    private List<List<ServerPSQL>> serverPsqlLists;
+    private final List<List<ServerPSQL>> serverPsqlLists;
     private final List<ServerCommon> serverCommonList;
 
     public SingleInfo(String ip, String dataInfo) {
@@ -129,6 +119,13 @@ public class SingleInfo {
         return serverIoTopList;
     }
 
+    public List<ServerPSQL> getTempPSQLList() {
+        return tempPSQLList;
+    }
+
+    public List<List<ServerPSQL>> getServerPsqlLists() {
+        return serverPsqlLists;
+    }
 
     public boolean hasValues() {
         boolean hasValues = false;

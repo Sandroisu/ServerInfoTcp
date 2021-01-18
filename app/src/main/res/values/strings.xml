@@ -16,4 +16,5 @@
     <string name="level">Level</string>
     <string name="pdf">pdf</string>
     <string name="iotop">IOTOP</string>
+    <string name="choose_disk">Выберите диск</string>
 </resources>

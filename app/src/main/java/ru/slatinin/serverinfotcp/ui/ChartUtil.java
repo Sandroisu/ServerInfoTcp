@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -29,6 +30,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.appbar.AppBarLayout;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
@@ -44,6 +46,7 @@ import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.ServerNET;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.serverdf.SingleServerDF;
+import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
 import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsqlList;
 import ru.slatinin.serverinfotcp.server.servertop.BaseTopInfo;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
@@ -73,6 +76,7 @@ public class ChartUtil {
         rightAxis.setAxisMinimum(0f);
         rightAxis.setGranularityEnabled(true);
         rightAxis.setGranularity(0.1f);
+        barChart.setExtraTopOffset(10f);
         rightAxis.setEnabled(yAxisEnable);
         Legend legend = barChart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
@@ -102,7 +106,7 @@ public class ChartUtil {
         pieChart.animateXY(1500, 1500);
     }
 
-    public static void initLineChart(LineChart lineChart) {
+    public static void initLineChart(LineChart lineChart, boolean lAxis, boolean rAxis, boolean nullDescription) {
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.enableGridDashedLine(10f, 10f, 0f);
@@ -113,9 +117,14 @@ public class ChartUtil {
         leftAxis.setAxisMinimum(0f);
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawZeroLine(false);
+        leftAxis.setEnabled(lAxis);
 
-        lineChart.getAxisRight().setEnabled(false);
-        lineChart.setDescription(null);
+        YAxis rightAxis = lineChart.getAxisRight();
+        rightAxis.setAxisMinimum(0f);
+        rightAxis.setEnabled(rAxis);
+        if (nullDescription) {
+            lineChart.setDescription(null);
+        }
         lineChart.setExtraOffsets(5f, 5f, 5f, 15f);
         lineChart.getLegend().setForm(Legend.LegendForm.CIRCLE);
     }
@@ -138,6 +147,9 @@ public class ChartUtil {
     }
 
     public static void updateNetList(List<ServerNET> list, LineChart chart) {
+        if (list == null || list.size() == 0) {
+            return;
+        }
         ArrayList<Entry> newSentValues = new ArrayList<>();
         ArrayList<Entry> newReceivedValues = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -156,24 +168,52 @@ public class ChartUtil {
         chart.invalidate();
     }
 
-    public static void updatePsqlList(List<List<ServerPSQL>> serverPsqlLists, LineChart chart, Context context) {
-        int[] colors = BaseTopInfo.getBarChartColors();
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        for (int j = 0; j < serverPsqlLists.get(0).size(); j++) {
-            ArrayList<Entry> entries = new ArrayList<>();
-            for (int k = 0; k < serverPsqlLists.size(); k++) {
-                entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_xact_commit));
-            }
-            LineDataSet set = createLineChartSet(new LineDataSet(entries, serverPsqlLists.get(0).get(j).c_datname), colors[j], false, 1f);
-            dataSets.add(set);
+    public static void  updateIoTopList(List<SingleIoTop> serverIoTopList, BarChart barChart, boolean showSpeed) {
+        List<IBarDataSet> barDataSets;
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        ArrayList<BarEntry> entries1 = new ArrayList<>();
+        if (barChart.getData() != null &&
+                barChart.getData().getDataSetCount() > 0) {
+            barDataSets = barChart.getData().getDataSets();
+            barDataSets.clear();
+        } else {
+            barDataSets = new ArrayList<>();
         }
-        LineData data = new LineData(dataSets);
-        chart.setData(data);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.invalidate();
+        String[] labels;
+        labels = new String[serverIoTopList.size()];
+        for (int i = 0; i < serverIoTopList.size(); i++) {
+            labels[i] = serverIoTopList.get(i).c_device;
+        }
+        for (int i = 0; i < serverIoTopList.size(); i++) {
+            SingleIoTop singleIoTop = serverIoTopList.get(i);
+            if (showSpeed) {
+                entries.add(new BarEntry(i, singleIoTop.n_kb_wrtn_s));
+                entries1.add(new BarEntry(i, singleIoTop.n_kb_read_s));
+            } else {
+                entries.add(new BarEntry(i, singleIoTop.n_kb_wrtn));
+                entries1.add(new BarEntry(i, singleIoTop.n_kb_read));
+            }
+        }
+        BarDataSet set = new BarDataSet(entries, "");
+        BarDataSet set1 = new BarDataSet(entries1, "");
+        set.setColor(Color.parseColor("#00c853"));
+        set1.setColor(Color.parseColor("#ffc400"));
+        barDataSets.add(set1);
+        barDataSets.add(set);
+        BarData data = new BarData(barDataSets);
+        data.setDrawValues(true);
+        data.setValueTextSize(6f);
+        data.setBarWidth(0.4f);
+        barChart.setData(data);
+        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        barChart.groupBars(-0.2f, 0.1f, 0.01f);
+        barChart.invalidate();
     }
 
     public static void updateCpuList(List<ServerCommon> serverCommonList, LineChart lcNetInfo) {
+        if (serverCommonList == null || serverCommonList.size() == 0) {
+            return;
+        }
         ArrayList<Entry> first = new ArrayList<>();
         ArrayList<Entry> second = new ArrayList<>();
         ArrayList<Entry> third = new ArrayList<>();
@@ -269,36 +309,26 @@ public class ChartUtil {
         barChart.invalidate();
     }
 
-    public static void updatePSQL(ServerPSQL serverPSQL, BarChart barChart) {
-        BarEntry entry = new BarEntry(0, (float) serverPSQL.n_xact_commit);
-        BarEntry entry1 = new BarEntry(0, (float) serverPSQL.n_numbackends);
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        ArrayList<BarEntry> entries1 = new ArrayList<>();
-        entries.add(entry);
-        entries1.add(entry1);
-        List<IBarDataSet> barDataSets;
-        if (barChart.getData() != null &&
-                barChart.getData().getDataSetCount() > 0) {
-            barDataSets = barChart.getData().getDataSets();
-            barDataSets.clear();
-        } else {
-            barDataSets = new ArrayList<>();
+    public static void updatePsqlList(List<List<ServerPSQL>> serverPsqlLists, LineChart chart, boolean xActCommits) {
+        int[] colors = BaseTopInfo.getBarChartColors();
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        for (int j = 0; j < serverPsqlLists.get(0).size(); j++) {
+            ArrayList<Entry> entries = new ArrayList<>();
+            for (int k = 0; k < serverPsqlLists.size(); k++) {
+                if (xActCommits) {
+                    entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_xact_commit));
+                } else {
+
+                    entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_numbackends));
+                }
+            }
+            LineDataSet set = createLineChartSet(new LineDataSet(entries, serverPsqlLists.get(0).get(j).c_datname), colors[j], false, 2f);
+            dataSets.add(set);
         }
-        BarDataSet set = new BarDataSet(entries, N_XACT_COMMIT);
-        BarDataSet set1 = new BarDataSet(entries1, ServerPSQL.N_NUMBACKENDS);
-        set.setColor(Color.parseColor("#0091ea"));
-        set1.setColor(Color.parseColor("#00c853"));
-        barDataSets.add(set);
-        barDataSets.add(set1);
-        BarData data = new BarData(barDataSets);
-        data.setValueTextSize(10f);
-        data.setDrawValues(false);
-        barChart.setData(data);
-        barChart.getBarData().setBarWidth(0.2f);
-        barChart.groupBars(-0.4f, 0.01f, 0.03f);
-        barChart.getData().notifyDataChanged();
-        barChart.notifyDataSetChanged();
-        barChart.invalidate();
+        LineData data = new LineData(dataSets);
+        chart.setData(data);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.invalidate();
     }
 
     public static void updateDiskInfo(ServerDFList serverDFList, BarChart barChart) {
@@ -378,6 +408,7 @@ public class ChartUtil {
                 return y + mK;
             }
         });
+
     }
 
     private static void setMemoryAxisFormatter(YAxis yAxis) {
@@ -400,4 +431,6 @@ public class ChartUtil {
         Date date = new Date(millis);
         return formatter.format(date);
     }
+
+
 }

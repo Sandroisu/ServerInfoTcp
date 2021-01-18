@@ -1,6 +1,5 @@
 package ru.slatinin.serverinfotcp.ui;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.view.Gravity;
@@ -22,10 +21,6 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.R;
@@ -92,7 +87,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             clNet = itemView.findViewById(R.id.item_server_net_block);
             clIoTop = itemView.findViewById(R.id.item_server_iotop_block);
             ImageView ivPdf = itemView.findViewById(R.id.item_server_pdf);
-            ChartUtil.initLineChart(lcCPU);
+            ChartUtil.initLineChart(lcCPU, true, false, true);
             ChartUtil.initBarChart(bcMem, false, false, false, true, Legend.LegendForm.CIRCLE);
             itemView.setOnClickListener(this);
             lcCPU.setOnClickListener(this);

@@ -56,10 +56,21 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <ImageView
+                android:id="@+id/da_net_pdf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:src="@drawable/ic_pdf"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_net_title" />
+
+
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/da_net"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toStartOf="@id/da_net_x_axis_title"
                 app:layout_constraintStart_toEndOf="@id/da_net_y_axis_title"
                 app:layout_constraintTop_toBottomOf="@id/da_net_title" />
@@ -110,12 +121,22 @@
                 android:layout_height="wrap_content"
                 android:rotation="-90"
                 android:text="@string/level"
-                app:layout_constraintBottom_toBottomOf="@id/da_load_average"
+                app:layout_constraintBottom_toBottomOf="@id/da_cpu_load"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/da_top_common" />
 
+            <ImageView
+                android:id="@+id/da_cpu_load_pdf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:src="@drawable/ic_pdf"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_top_common" />
+
+
             <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/da_load_average"
+                android:id="@+id/da_cpu_load"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
@@ -129,17 +150,34 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
                 android:text="@string/time"
-                app:layout_constraintBottom_toBottomOf="@id/da_load_average"
+                app:layout_constraintBottom_toBottomOf="@id/da_cpu_load"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/da_top_mem"
+            <RelativeLayout
+                android:id="@+id/da_rl_top_mem"
                 android:layout_width="0dp"
-                android:layout_height="250dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="@id/da_top_guideline_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/da_load_average" />
+                app:layout_constraintTop_toBottomOf="@id/da_cpu_load">
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/da_top_mem"
+                    android:layout_width="0dp"
+                    android:layout_height="250dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true" />
+
+                <ImageView
+                    android:id="@+id/da_top_mem_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_pdf" />
+            </RelativeLayout>
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/da_top_swap"
@@ -148,7 +186,7 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/da_top_guideline_vertical"
-                app:layout_constraintTop_toBottomOf="@id/da_load_average" />
+                app:layout_constraintTop_toBottomOf="@id/da_cpu_load" />
 
             <com.github.mikephil.charting.charts.PieChart
                 android:id="@+id/da_top_tasks"
@@ -157,7 +195,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/da_top_guideline_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/da_top_mem" />
+                app:layout_constraintTop_toBottomOf="@id/da_rl_top_mem" />
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/da_top_cpu"
@@ -166,7 +204,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/da_top_guideline_vertical"
-                app:layout_constraintTop_toBottomOf="@id/da_top_mem" />
+                app:layout_constraintTop_toBottomOf="@id/da_rl_top_mem" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/da_top_guideline_vertical"
@@ -178,13 +216,67 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/da_psql_block"
+            android:id="@+id/da_iotop_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/da_top_block"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/da_iotop_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/iotop"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <RelativeLayout
+                android:id="@+id/da_rl_iotop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_iotop_title">
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/da_iotop_speed"
+                    android:layout_width="0dp"
+                    android:layout_height="250dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true" />
+
+                <ImageView
+                    android:id="@+id/da_iotop_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_pdf" />
+            </RelativeLayout>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/da_iotop_total"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_rl_iotop" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/da_psql_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/da_iotop_block"
             tools:visibility="visible">
 
             <TextView
@@ -196,12 +288,22 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/da_psql"
+                android:id="@+id/da_psql_xac"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/da_psql_title" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/da_psql_nbe"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_psql_xac" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -222,14 +324,31 @@
                 android:text="@string/df"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/da_df"
+            <RelativeLayout
+                android:id="@+id/da_rl_df"
                 android:layout_width="0dp"
-                android:layout_height="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/da_df_title" />
+                app:layout_constraintTop_toBottomOf="@id/da_df_title">
 
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/da_df"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true" />
+
+                <ImageView
+                    android:id="@+id/da_df_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_pdf" />
+            </RelativeLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

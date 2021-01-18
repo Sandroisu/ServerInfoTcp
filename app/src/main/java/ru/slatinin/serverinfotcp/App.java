@@ -84,7 +84,7 @@ public class App extends Application {
                     }
                     if (position >= 0) {
                         for (OnTcpInfoReceived listener : listenersList) {
-                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position));
+                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position), dataInfo);
                         }
                     }
                 }
