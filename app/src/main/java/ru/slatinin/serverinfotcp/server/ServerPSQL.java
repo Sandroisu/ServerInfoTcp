@@ -11,11 +11,13 @@ public class ServerPSQL extends BaseServerInfo {
     public final String c_datname;
     public final int n_xact_commit;
     public final int n_numbackends;
+    public final long createTime;
 
     public ServerPSQL(JsonObject object) {
         super(object);
         c_datname = JsonUtil.getString(object, C_DATNAME);
         n_xact_commit = JsonUtil.getInt(object, N_XACT_COMMIT);
         n_numbackends = JsonUtil.getInt(object, N_NUMBACKENDS);
+        createTime = System.currentTimeMillis();
     }
 }

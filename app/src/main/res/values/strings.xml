@@ -14,4 +14,6 @@
     <string name="mem">MEM</string>
     <string name="top">TOP</string>
     <string name="level">Level</string>
+    <string name="pdf">pdf</string>
+    <string name="iotop">IOTOP</string>
 </resources>

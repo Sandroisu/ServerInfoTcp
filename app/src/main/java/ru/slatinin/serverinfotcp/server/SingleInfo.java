@@ -7,7 +7,6 @@ import java.util.List;
 
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
-import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 
@@ -20,24 +19,39 @@ public class SingleInfo {
     public static final String PSQL = "psql";
 
     public final String ip;
+    public long time;
     public String dataInfo;
     private final List<ServerNET> serverNETList;
     private ServerNET lastServerNET;
     private ServerDFList serverDFList;
     private ServerIoTopList serverIoTopList;
-    private ServerPSQL serverPSQL;
     private ServerTOP serverTOP;
+
+    public List<ServerPSQL> getTempPSQLList() {
+        return tempPSQLList;
+    }
+
+    private List<ServerPSQL> tempPSQLList;
+
+    public List<List<ServerPSQL>> getServerPsqlLists() {
+        return serverPsqlLists;
+    }
+
+    private List<List<ServerPSQL>> serverPsqlLists;
     private final List<ServerCommon> serverCommonList;
 
     public SingleInfo(String ip, String dataInfo) {
         this.ip = ip;
         this.dataInfo = dataInfo;
+        this.time = System.currentTimeMillis();
         serverNETList = new ArrayList<>();
         serverCommonList = new ArrayList<>();
+        serverPsqlLists = new ArrayList<>();
     }
 
     public void updateServerInfo(SingleInfo info, String dataInfo) {
         this.dataInfo = dataInfo;
+        this.time = info.time;
         switch (dataInfo) {
             case NET:
                 lastServerNET = info.lastServerNET;
@@ -57,7 +71,10 @@ public class SingleInfo {
                 serverDFList = info.serverDFList;
                 break;
             case PSQL:
-                serverPSQL = info.serverPSQL;
+                if (serverPsqlLists.size()>9){
+                    serverPsqlLists.remove(0);
+                }
+                serverPsqlLists.add(info.getTempPSQLList());
                 break;
             case IOTOP:
                 serverIoTopList = info.serverIoTopList;
@@ -77,12 +94,14 @@ public class SingleInfo {
                 serverDFList = new ServerDFList(object);
                 break;
             case PSQL:
-                serverPSQL = new ServerPSQL(object[0]);
+                tempPSQLList = new ArrayList<>();
+                for (JsonObject obj:object) {
+                    tempPSQLList.add(new ServerPSQL(obj));
+                }
                 break;
             case IOTOP:
                 serverIoTopList = new ServerIoTopList(object);
                 break;
-
         }
     }
 
@@ -92,10 +111,6 @@ public class SingleInfo {
 
     public ServerNET getLastServerNET() {
         return lastServerNET;
-    }
-
-    public ServerPSQL getServerPSQL() {
-        return serverPSQL;
     }
 
     public ServerTOP getServerTOP() {
@@ -114,26 +129,25 @@ public class SingleInfo {
         return serverIoTopList;
     }
 
-    public boolean hasValues(){
+
+    public boolean hasValues() {
         boolean hasValues = false;
-        if (getServerDFList()!=null){
+        if (getServerDFList() != null) {
             hasValues = true;
         }
-        if (getLastServerNET()!=null){
+        if (getLastServerNET() != null) {
             hasValues = true;
         }
-        if (getServerPSQL()!=null){
+        if (getServerTOP() != null) {
             hasValues = true;
         }
-        if(getServerTOP()!=null){
+        if (getServerNETList().size() > 0) {
             hasValues = true;
         }
-        if(getServerNETList().size()>0){
-            hasValues = true;
-        }
-        if (getServerCommonList().size()>0){
+        if (getServerCommonList().size() > 0) {
             hasValues = true;
         }
         return hasValues;
     }
+
 }

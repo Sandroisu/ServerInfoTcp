@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
+import ru.slatinin.serverinfotcp.server.ServerArgs;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.sevice.TcpService;
@@ -20,12 +21,17 @@ import ru.slatinin.serverinfotcp.ui.OnTcpInfoReceived;
 
 import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
+import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
 public class App extends Application {
 
+    public final static String BASE_URL = "http://cic.it-serv.ru";
+    private final String ARGS = "args";
+
+    private ServerArgs serverArgs;
     private InfoHolder infoHolder;
     private TcpClient tcpClient;
     private ArrayList<OnTcpInfoReceived> listenersList;
@@ -59,25 +65,26 @@ public class App extends Application {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
-                    if (DF.equals(dataInfo)||IOTOP.equals(dataInfo)) {
+                    if (ARGS.equals(dataInfo)) {
+                        serverArgs = new ServerArgs(objects[0]);
+                        return;
+                    }
+                    int position = -1;
+                    if (DF.equals(dataInfo) || IOTOP.equals(dataInfo)||PSQL.equals(dataInfo)) {
                         SingleInfo info = new SingleInfo(ip, dataInfo);
                         info.init(dataInfo, objects);
-                        int position = infoHolder.updateOrAddInfo(info, dataInfo);
-                        if (position >= 0) {
-                            for (OnTcpInfoReceived listener : listenersList) {
-                                listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position));
-                            }
-                        }
+                        position = infoHolder.updateOrAddInfo(info, dataInfo);
+
                     } else {
                         for (JsonObject object : objects) {
                             SingleInfo info = new SingleInfo(ip, dataInfo);
                             info.init(dataInfo, object);
-                            int position = infoHolder.updateOrAddInfo(info, dataInfo);
-                            if (position >= 0) {
-                                for (OnTcpInfoReceived listener : listenersList) {
-                                    listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position));
-                                }
-                            }
+                            position = infoHolder.updateOrAddInfo(info, dataInfo);
+                        }
+                    }
+                    if (position >= 0) {
+                        for (OnTcpInfoReceived listener : listenersList) {
+                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position));
                         }
                     }
                 }
@@ -117,4 +124,9 @@ public class App extends Application {
     public void removeTcpChangeListener(OnTcpInfoReceived listener) {
         listenersList.remove(listener);
     }
+
+    public ServerArgs getServerArgs() {
+        return serverArgs;
+    }
+
 }

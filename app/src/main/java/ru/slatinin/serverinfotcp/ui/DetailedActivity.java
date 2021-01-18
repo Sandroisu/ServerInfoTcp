@@ -1,11 +1,13 @@
 package ru.slatinin.serverinfotcp.ui;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -34,7 +36,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     private BarChart bcTopCpu;
     private LineChart lcCpuInfo;
 
-    private BarChart bcPsqlInfo;
+    private LineChart lcPsqlInfo;
 
     private TextView tvError;
     private Button btnReconnect;
@@ -50,6 +52,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         setContentView(R.layout.detailed_activity);
         App app = (App) getApplication();
         app.addTcpChangeListener(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         lcNetInfo = findViewById(R.id.da_net);
         lcCpuInfo = findViewById(R.id.da_load_average);
@@ -59,7 +62,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         bcTopMem = findViewById(R.id.da_top_mem);
         bcTopSwap = findViewById(R.id.da_top_swap);
         bcTopCpu = findViewById(R.id.da_top_cpu);
-        bcPsqlInfo = findViewById(R.id.da_psql);
+        lcPsqlInfo = findViewById(R.id.da_psql);
         tvError = findViewById(R.id.da_error);
         clPsql = findViewById(R.id.da_psql_block);
         clDf = findViewById(R.id.da_df_block);
@@ -70,7 +73,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
         ChartUtil.initLineChart(lcNetInfo);
         ChartUtil.initLineChart(lcCpuInfo);
-        ChartUtil.initBarChart(bcPsqlInfo, true, false, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initLineChart(lcPsqlInfo);
         ChartUtil.initBarChart(bcTopMem, true, true, false, true, Legend.LegendForm.CIRCLE);
         ChartUtil.initBarChart(bcTopSwap, true, true, false, true, Legend.LegendForm.CIRCLE);
         ChartUtil.initBarChart(bcTopCpu, false, true, false, true, Legend.LegendForm.CIRCLE);
@@ -101,11 +104,12 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
                 updateTop(info.getServerTOP());
                 ChartUtil.updateCpuList(info.getServerCommonList(), lcCpuInfo);
             }
-            if (info.getServerPSQL() != null && info.ip.equals(ip)) {
+            int x = info.getServerPsqlLists().size();
+            if (x>0 && info.ip.equals(ip)) {
                 if (clPsql.getVisibility()==View.GONE){
                     clPsql.setVisibility(View.VISIBLE);
                 }
-                ChartUtil.updatePSQL(info.getServerPSQL(), bcPsqlInfo);
+                ChartUtil.updatePsqlList(info.getServerPsqlLists(), lcPsqlInfo, this);
             }
         });
 
@@ -156,5 +160,13 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     public void onConnectAttempt() {
         btnReconnect.setVisibility(View.GONE);
         tvError.setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home){
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,10 +1,6 @@
 package ru.slatinin.serverinfotcp.server;
 
-import androidx.core.view.ViewCompat;
-
 import com.google.gson.JsonObject;
-
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
 
 public class ServerNET extends BaseServerInfo {
 
@@ -24,6 +20,6 @@ public class ServerNET extends BaseServerInfo {
     }
 
     public String getInfoString() {
-        return NET + ":\t" + C_NAME + " - " + c_name + ";\t\t" + N_SENT + " - " + n_sent + ";\t\t" + N_RECEIVED + " - " + n_received + ";";
+        return N_SENT + " - " + n_sent + "KB/s;\t\t" + N_RECEIVED + " - " + n_received + "Kb/s;";
     }
 }

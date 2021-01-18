@@ -1,13 +1,16 @@
 package ru.slatinin.serverinfotcp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         super.onStart();
         App app = (App) getApplication();
         app.addTcpChangeListener(this);
-        if (infoHolder == null){
+        if (infoHolder == null) {
             infoHolder = app.getInfoHolder();
         }
     }
@@ -95,6 +98,28 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         Intent intent = new Intent(this, DetailedActivity.class);
         intent.putExtra(IP, ip);
         startActivity(intent);
+    }
+
+    @Override
+    public void onOpenBrowser(String ip) {
+        App app = (App) getApplication();
+        if (app.getServerArgs() != null) {
+            String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3Atcp-monitor.prpt/generatedContent?c_server="
+                    + ip + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
+            if (url.contains("//")) {
+                url = url.replace("//", "/");
+            }
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(url));
+            startActivity(browserIntent);
+        } else {
+            Toast.makeText(app, "Невозможно получить файл", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRedSignal(ImageView signal) {
+        runOnUiThread(() -> signal.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_server_problem_signal_24)));
     }
 
     @Override

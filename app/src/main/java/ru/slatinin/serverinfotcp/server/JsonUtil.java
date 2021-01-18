@@ -34,13 +34,21 @@ public class JsonUtil {
         return 0f;
     }
 
+    public static long getLong(JsonObject object, String key) {
+        if (object != null && object.has(key)) {
+            try {
+                return object.get(key).getAsLong();
+            } catch (UnsupportedOperationException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
     private static float getFloatFromStringWithComma(String floatWithComma) {
         try {
             if (floatWithComma.contains(",")) {
-                if (floatWithComma.indexOf(",") == floatWithComma.length() - 1){
-                    floatWithComma = floatWithComma.substring(0, floatWithComma.length()-2);
-                }
-                    floatWithComma = floatWithComma.replace(",", ".");
+                floatWithComma = floatWithComma.replace(",", ".");
             }
             return Float.parseFloat(floatWithComma);
         } catch (NumberFormatException e) {
