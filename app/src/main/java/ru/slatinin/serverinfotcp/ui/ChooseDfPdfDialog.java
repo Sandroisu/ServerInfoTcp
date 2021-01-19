@@ -17,18 +17,26 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import java.util.List;
 import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 
 public class ChooseDfPdfDialog extends DialogFragment {
-    private final ServerDFList serverDFList;
+    private ServerDFList serverDFList;
+    private List<ServerPSQL> serverPSQLList;
     private final String ip;
 
     public ChooseDfPdfDialog(ServerDFList serverDFList, String ip) {
         this.serverDFList = serverDFList;
+        this.ip = ip;
+    }
+
+    public ChooseDfPdfDialog(List<ServerPSQL> serverPSQLList, String ip) {
+        this.serverPSQLList = serverPSQLList;
         this.ip = ip;
     }
 
@@ -37,8 +45,17 @@ public class ChooseDfPdfDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_fragment_choose_pdf, container, false);
         LinearLayout verticalContainer = v.findViewById(R.id.cp_vertical_container);
-        for (int i = 0; i < serverDFList.singleServerDFList.size(); i++) {
-            String name = serverDFList.singleServerDFList.get(i).c_name;
+        boolean isDF = serverPSQLList == null;
+        int size = isDF ? serverDFList.singleServerDFList.size() : serverPSQLList.size();
+        String monitor = isDF ? "df" : "psql";
+        String parameter = isDF ? "&c_disk=" : "&c_db=";
+        for (int i = 0; i < size; i++) {
+            String name;
+            if (isDF) {
+                name = serverDFList.singleServerDFList.get(i).c_name;
+            } else {
+                name = serverPSQLList.get(i).c_datname;
+            }
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(25, 25, 25, 25);
@@ -61,8 +78,8 @@ public class ChooseDfPdfDialog extends DialogFragment {
             imageView.setOnClickListener(v1 -> {
                 App app = (App) requireActivity().getApplication();
                 if (app.getServerArgs() != null) {
-                    String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3Adf-monitor.prpt/generatedContent?c_server="
-                            + ip + "&c_disk=" + name + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
+                    String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3A" + monitor + "-monitor.prpt/generatedContent?c_server="
+                            + ip + parameter + name + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
                     if (url.contains("//")) {
                         url = url.replace("//", "/");
                     }

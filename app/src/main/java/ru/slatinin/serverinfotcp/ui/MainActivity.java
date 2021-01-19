@@ -41,11 +41,11 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleInfoList(), this);
         mRecyclerView.setAdapter(serverInfoAdapter);
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
-        serverInfoDialog.show(getSupportFragmentManager(), "map-help-dialog");
+        serverInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         Button reconnect = findViewById(R.id.activity_main_reconnect);
         reconnect.setOnClickListener(v -> {
             ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
-            reconnectServerInfoDialog.show(getSupportFragmentManager(), "map-help-dialog");
+            reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         });
         Button send = findViewById(R.id.activity_main_send);
         send.setOnClickListener(v -> {

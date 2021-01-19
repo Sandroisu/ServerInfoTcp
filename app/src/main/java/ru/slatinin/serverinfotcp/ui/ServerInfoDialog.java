@@ -29,7 +29,7 @@ import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
 public class ServerInfoDialog extends DialogFragment {
-    private OnConnectAttempt onConnectAttempt;
+    private final OnConnectAttempt onConnectAttempt;
 
     public ServerInfoDialog(OnConnectAttempt onConnectAttempt) {
         this.onConnectAttempt = onConnectAttempt;
@@ -61,12 +61,10 @@ public class ServerInfoDialog extends DialogFragment {
                 return;
             }
             FragmentActivity activity = requireActivity();
-            if (activity != null) {
-                App app = (App) activity.getApplication();
-                app.connect(serverAddress.getText().toString(), serverPort.getText().toString());
-                onConnectAttempt.onConnectAttempt();
-                dismiss();
-            }
+            App app = (App) activity.getApplication();
+            app.connect(serverAddress.getText().toString(), serverPort.getText().toString());
+            onConnectAttempt.onConnectAttempt();
+            dismiss();
         });
         return v;
     }
@@ -79,6 +77,6 @@ public class ServerInfoDialog extends DialogFragment {
     }
 
     private boolean emptyOrNull(String toBeChecked) {
-        return toBeChecked.isEmpty() || toBeChecked == null;
+        return toBeChecked.isEmpty();
     }
 }

@@ -17,4 +17,5 @@
     <string name="pdf">pdf</string>
     <string name="iotop">IOTOP</string>
     <string name="choose_disk">Выберите диск</string>
+    <string name="net_log">NET-LOG</string>
 </resources>

@@ -22,9 +22,11 @@ import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 
 import java.util.List;
+import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
@@ -34,13 +36,15 @@ import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
+import static ru.slatinin.serverinfotcp.server.SingleInfo.NET_LOG;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
 
 
 public class DetailedActivity extends AppCompatActivity implements OnTcpInfoReceived, ViewTreeObserver.OnGlobalLayoutListener, OnConnectAttempt {
 
-    private LineChart lcNetInfo;
+    private LineChart lcNet;
+    private LineChart lcNetLog;
 
     private BarChart bcDiskInfo;
 
@@ -62,11 +66,15 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     private ConstraintLayout clPsql;
     private ConstraintLayout clDf;
     private ConstraintLayout clIoTop;
+    private ConstraintLayout clNetLog;
 
     private ImageView ivCpuPdf;
     private ImageView ivMemPdf;
     private ImageView ivNetPdf;
     private ImageView ivDfPdf;
+    private ImageView ivIoTopPdf;
+    private ImageView ivNetLogPdf;
+    private ImageView ivPsqlPdf;
 
     private String ip;
 
@@ -76,9 +84,12 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         setContentView(R.layout.detailed_activity);
         App app = (App) getApplication();
         app.addTcpChangeListener(this);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ip = getIntent().getStringExtra(MainActivity.IP);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setSubtitle(ip);
 
-        lcNetInfo = findViewById(R.id.da_net);
+        lcNet = findViewById(R.id.da_net);
+        lcNetLog = findViewById(R.id.da_net_log);
         lcCpuInfo = findViewById(R.id.da_cpu_load);
         bcDiskInfo = findViewById(R.id.da_df);
         tvTopCommon = findViewById(R.id.da_top_common);
@@ -94,44 +105,51 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         clPsql = findViewById(R.id.da_psql_block);
         clDf = findViewById(R.id.da_df_block);
         clIoTop = findViewById(R.id.da_iotop_block);
+        clNetLog = findViewById(R.id.da_net_log_block);
         ivCpuPdf = findViewById(R.id.da_cpu_load_pdf);
         ivMemPdf = findViewById(R.id.da_top_mem_pdf);
         ivNetPdf = findViewById(R.id.da_net_pdf);
         ivDfPdf = findViewById(R.id.da_df_pdf);
+        ivIoTopPdf = findViewById(R.id.da_iotop_pdf);
+        ivNetLogPdf = findViewById(R.id.da_net_log_pdf);
+        ivPsqlPdf = findViewById(R.id.da_psql_pdf);
 
         bcTopMem.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
-        ip = getIntent().getStringExtra(MainActivity.IP);
-
-        ChartUtil.initLineChart(lcNetInfo, true, false, true);
+        ChartUtil.initLineChart(lcNet, true, false, true);
+        ChartUtil.initLineChart(lcNetLog, true, false, true);
         ChartUtil.initLineChart(lcCpuInfo, true, false, true);
         ChartUtil.initLineChart(lcPsqlXac, false, true, false);
         ChartUtil.initLineChart(lcPsqlNbe, false, true, false);
         ChartUtil.initBarChart(bcTopMem, true, true, false, true, Legend.LegendForm.CIRCLE);
         ChartUtil.initBarChart(bcTopSwap, true, true, false, true, Legend.LegendForm.CIRCLE);
         ChartUtil.initBarChart(bcTopCpu, false, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcIoTopSpeed, true, false, true, false, Legend.LegendForm.NONE);
-        ChartUtil.initBarChart(bcIoTopTotal, true, false, true, false, Legend.LegendForm.NONE);
+        ChartUtil.initBarChart(bcIoTopSpeed, true, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcIoTopTotal, true, false, true, false, Legend.LegendForm.CIRCLE);
         ChartUtil.initPieChart(pcTopTasks);
         ChartUtil.initBarChart(bcDiskInfo, true, false, true, false, Legend.LegendForm.NONE);
 
         btnReconnect = findViewById(R.id.da_reconnect);
         btnReconnect.setOnClickListener(v -> {
             ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
-            reconnectServerInfoDialog.show(getSupportFragmentManager(), "map-help-dialog");
+            reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         });
         ivCpuPdf.setOnClickListener(v -> openBrowser(app, "cpu"));
-        ivMemPdf.setOnClickListener(v -> openBrowser(app, "top"));
-        ivNetPdf.setOnClickListener(v -> openBrowser(app, "net"));
+        ivMemPdf.setOnClickListener(v -> openBrowser(app, TOP));
+        ivNetPdf.setOnClickListener(v -> openBrowser(app, NET));
+        ivIoTopPdf.setOnClickListener(v -> openBrowser(app, IOTOP));
+        ivNetLogPdf.setOnClickListener(v -> openBrowser(app, NET_LOG));
+
         for (int i = 0; i < app.getInfoHolder().getSingleInfoList().size(); i++) {
-            if (app.getInfoHolder().getSingleInfoList().get(i).ip.equals(ip)){
+            if (app.getInfoHolder().getSingleInfoList().get(i).ip.equals(ip)) {
                 SingleInfo info = app.getInfoHolder().getSingleInfoList().get(i);
-                ChartUtil.updateNetList(info.getServerNETList(), lcNetInfo);
+                ChartUtil.updateNetList(info.getServerNETList(), lcNet);
                 updateDiskInfo(info.getServerDFList());
                 updateTop(info.getServerTOP());
                 ChartUtil.updateCpuList(info.getServerCommonList(), lcCpuInfo);
                 updatePsql(info.getServerPsqlLists());
                 updateIoTop(info.getServerIoTopList());
+                updateNetLog(info.getServerNetLogList());
                 break;
             }
         }
@@ -146,7 +164,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
             }
             switch (dataInfo) {
                 case NET:
-                    ChartUtil.updateNetList(info.getServerNETList(), lcNetInfo);
+                    ChartUtil.updateNetList(info.getServerNETList(), lcNet);
                     break;
                 case DF:
                     updateDiskInfo(info.getServerDFList());
@@ -160,6 +178,9 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
                     break;
                 case IOTOP:
                     updateIoTop(info.getServerIoTopList());
+                    break;
+                case NET_LOG:
+                    updateNetLog(info.getServerNetLogList());
                     break;
             }
         });
@@ -177,7 +198,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     private void updateTop(ServerTOP serverTOP) {
-        if (serverTOP == null){
+        if (serverTOP == null) {
             return;
         }
         ChartUtil.updateTopBarChart(serverTOP.serverMem, bcTopMem, true);
@@ -187,8 +208,8 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.updateServerCommon(serverTOP.serverCommon, tvTopCommon);
     }
 
-    private void updateDiskInfo(ServerDFList serverDFList){
-        if (serverDFList == null || serverDFList.singleServerDFList.size()==0){
+    private void updateDiskInfo(ServerDFList serverDFList) {
+        if (serverDFList == null || serverDFList.singleServerDFList.size() == 0) {
             return;
         }
         if (clDf.getVisibility() == View.GONE) {
@@ -197,12 +218,12 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.updateDiskInfo(serverDFList, bcDiskInfo);
         ivDfPdf.setOnClickListener(v -> {
             ChooseDfPdfDialog chooseDfPdfDialog = new ChooseDfPdfDialog(serverDFList, ip);
-            chooseDfPdfDialog.show(getSupportFragmentManager(), "map-help-dialog");
+            chooseDfPdfDialog.show(getSupportFragmentManager(), "choose_df_dialog");
         });
     }
 
-    private void updatePsql(List<List<ServerPSQL>> serverPSQLS){
-        if (serverPSQLS == null || serverPSQLS.size()==0){
+    private void updatePsql(List<List<ServerPSQL>> serverPSQLS) {
+        if (serverPSQLS == null || serverPSQLS.size() == 0) {
             return;
         }
         if (clPsql.getVisibility() == View.GONE) {
@@ -210,10 +231,14 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         }
         ChartUtil.updatePsqlList(serverPSQLS, lcPsqlXac, true);
         ChartUtil.updatePsqlList(serverPSQLS, lcPsqlNbe, false);
+        ivPsqlPdf.setOnClickListener(v -> {
+            ChooseDfPdfDialog chooseDfPdfDialog = new ChooseDfPdfDialog(serverPSQLS.get(0), ip);
+            chooseDfPdfDialog.show(getSupportFragmentManager(), "choose_psql_dialog");
+        });
     }
 
-    private void updateIoTop(ServerIoTopList serverIoTopLists){
-        if (serverIoTopLists == null){
+    private void updateIoTop(ServerIoTopList serverIoTopLists) {
+        if (serverIoTopLists == null) {
             return;
         }
         if (clIoTop.getVisibility() == View.GONE) {
@@ -222,6 +247,17 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.updateIoTopList(serverIoTopLists.serverIoTopList, bcIoTopSpeed, true);
         ChartUtil.updateIoTopList(serverIoTopLists.serverIoTopList, bcIoTopTotal, false);
     }
+
+    private void updateNetLog(List<ServerNetLog> serverNetLogs) {
+        if (serverNetLogs.size() == 0) {
+            return;
+        }
+        if (clNetLog.getVisibility() == View.GONE) {
+            clNetLog.setVisibility(View.VISIBLE);
+        }
+        ChartUtil.updateNetLogList(serverNetLogs, lcNetLog);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -96,6 +96,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         }
 
         protected void bind(SingleInfo info) {
+            buildTable(info.getServerIoTopList(), clIoTop, tlIotop, mContext);
             tvTime.setText(ChartUtil.formatMillis(info.time));
             ivSignal.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_server_ok_signal_24));
             Handler handler = new Handler();
@@ -115,55 +116,6 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
                 case TOP:
                     ChartUtil.updateTopBarChart(info.getServerTOP().serverMem, bcMem, true);
                     ChartUtil.updateCpuList(info.getServerCommonList(), lcCPU);
-                    break;
-                case IOTOP:
-                    if (clIoTop.getVisibility() == View.GONE) {
-                        clIoTop.setVisibility(View.VISIBLE);
-                    }
-                    tlIotop.removeAllViews();
-                    TableRow namesRow = new TableRow(mContext);
-                    for (int i = 0; i < ServerIoTopList.columnNames.length; i++) {
-                        TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        layoutParams.setMargins(0, 0, 10, 0);
-                        if (i > 0) {
-                            layoutParams.gravity = Gravity.END;
-                        }
-                        TextView name = new TextView(mContext);
-                        name.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
-                        String text = ServerIoTopList.columnNames[i] + " ";
-                        name.setText(text);
-                        name.setLayoutParams(layoutParams);
-                        name.setPadding(0, 0, 1,0);
-                        name.setTextSize(12);
-                        namesRow.addView(name);
-                    }
-                    tlIotop.addView(namesRow);
-                    List<SingleIoTop> singleIoTopList = info.getServerIoTopList().serverIoTopList;
-                    for (int i = 0; i < singleIoTopList.size(); i++) {
-                        if (singleIoTopList.get(i).isMoreThenOne) {
-                            List<String> values = singleIoTopList.get(i).serverIoTopMapList;
-                            TableRow valueRow = new TableRow(mContext);
-                            for (int j = 0; j < values.size(); j++) {
-                                TableRow.LayoutParams params = new TableRow.LayoutParams(
-                                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-
-                                params.setMargins(0, 1, 10, 0);
-                                TextView value = new TextView(mContext);
-                                if (isNumeric(values.get(j))) {
-                                    params.gravity = Gravity.END;
-                                }
-                                value.setLayoutParams(params);
-                                value.setPadding(0, 0, 1,0);
-                                value.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
-                                String text = values.get(j) + " ";
-                                value.setText(text);
-                                value.setTextSize(12);
-                                valueRow.addView(value);
-                            }
-                            tlIotop.addView(valueRow);
-                        }
-                    }
                     break;
             }
         }
@@ -186,6 +138,59 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             return true;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    private static void buildTable(ServerIoTopList serverIoTopList, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
+        if (serverIoTopList == null || serverIoTopList.serverIoTopList.size() == 0) {
+            return;
+        }
+        if (clIoTop.getVisibility() == View.GONE) {
+            clIoTop.setVisibility(View.VISIBLE);
+        }
+        tlIotop.removeAllViews();
+        TableRow namesRow = new TableRow(mContext);
+        for (int i = 0; i < ServerIoTopList.columnNames.length; i++) {
+            TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, 0, 10, 0);
+            if (i > 0) {
+                layoutParams.gravity = Gravity.END;
+            }
+            TextView name = new TextView(mContext);
+            name.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+            String text = ServerIoTopList.columnNames[i] + " ";
+            name.setText(text);
+            name.setLayoutParams(layoutParams);
+            name.setPadding(0, 0, 1, 0);
+            name.setTextSize(12);
+            namesRow.addView(name);
+        }
+        tlIotop.addView(namesRow);
+        List<SingleIoTop> singleIoTopList = serverIoTopList.serverIoTopList;
+        for (int i = 0; i < singleIoTopList.size(); i++) {
+            if (singleIoTopList.get(i).isMoreThenOne) {
+                List<String> values = singleIoTopList.get(i).serverIoTopMapList;
+                TableRow valueRow = new TableRow(mContext);
+                for (int j = 0; j < values.size(); j++) {
+                    TableRow.LayoutParams params = new TableRow.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+                    params.setMargins(0, 1, 10, 0);
+                    TextView value = new TextView(mContext);
+                    if (isNumeric(values.get(j))) {
+                        params.gravity = Gravity.END;
+                    }
+                    value.setLayoutParams(params);
+                    value.setPadding(0, 0, 1, 0);
+                    value.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+                    String text = values.get(j) + " ";
+                    value.setText(text);
+                    value.setTextSize(12);
+                    valueRow.addView(value);
+                }
+                tlIotop.addView(valueRow);
+            }
         }
     }
 

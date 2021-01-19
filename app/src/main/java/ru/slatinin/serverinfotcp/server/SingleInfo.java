@@ -13,6 +13,7 @@ import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 public class SingleInfo {
 
     public static final String NET = "net";
+    public static final String NET_LOG = "net-log";
     public static final String TOP = "top";
     public static final String IOTOP = "iotop";
     public static final String DF = "df";
@@ -21,8 +22,10 @@ public class SingleInfo {
     public final String ip;
     public long time;
     public String dataInfo;
-    private final List<ServerNET> serverNETList;
     private ServerNET lastServerNET;
+    private final List<ServerNET> serverNETList;
+    private ServerNetLog lastServerNetLog;
+    private final List<ServerNetLog> serverNetLogList;
     private ServerDFList serverDFList;
     private ServerIoTopList serverIoTopList;
     private ServerTOP serverTOP;
@@ -37,6 +40,7 @@ public class SingleInfo {
         serverNETList = new ArrayList<>();
         serverCommonList = new ArrayList<>();
         serverPsqlLists = new ArrayList<>();
+        serverNetLogList = new ArrayList<>();
     }
 
     public void updateServerInfo(SingleInfo info, String dataInfo) {
@@ -61,13 +65,20 @@ public class SingleInfo {
                 serverDFList = info.serverDFList;
                 break;
             case PSQL:
-                if (serverPsqlLists.size()>9){
+                if (serverPsqlLists.size() > 9) {
                     serverPsqlLists.remove(0);
                 }
                 serverPsqlLists.add(info.getTempPSQLList());
                 break;
             case IOTOP:
                 serverIoTopList = info.serverIoTopList;
+                break;
+            case NET_LOG:
+                lastServerNetLog = info.lastServerNetLog;
+                if (serverNetLogList.size() > 59) {
+                    serverNetLogList.remove(0);
+                }
+                serverNetLogList.add(info.lastServerNetLog);
                 break;
         }
     }
@@ -85,12 +96,15 @@ public class SingleInfo {
                 break;
             case PSQL:
                 tempPSQLList = new ArrayList<>();
-                for (JsonObject obj:object) {
+                for (JsonObject obj : object) {
                     tempPSQLList.add(new ServerPSQL(obj));
                 }
                 break;
             case IOTOP:
                 serverIoTopList = new ServerIoTopList(object);
+                break;
+            case NET_LOG:
+                lastServerNetLog = new ServerNetLog(object[0]);
                 break;
         }
     }
@@ -127,6 +141,11 @@ public class SingleInfo {
         return serverPsqlLists;
     }
 
+    public List<ServerNetLog> getServerNetLogList() {
+        return serverNetLogList;
+    }
+
+
     public boolean hasValues() {
         boolean hasValues = false;
         if (getServerDFList() != null) {
@@ -142,6 +161,15 @@ public class SingleInfo {
             hasValues = true;
         }
         if (getServerCommonList().size() > 0) {
+            hasValues = true;
+        }
+        if (getServerNetLogList().size() > 0) {
+            hasValues = true;
+        }
+        if (getServerIoTopList() != null) {
+            hasValues = true;
+        }
+        if (getServerPsqlLists().size() > 0) {
             hasValues = true;
         }
         return hasValues;
