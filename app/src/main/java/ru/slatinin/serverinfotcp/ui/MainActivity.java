@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     public static final String PORT = "ru.slatinin.serverinfotcp.port";
     public static final String IP = "ru.slatinin.serverinfotcp.ip";
     public static final String REPO = "ru.slatinin.serverinfotcp.repo";
+    public static final String BASE_URL = "ru.slatinin.serverinfotcp.repo";
     private TcpClient mTcpClient;
     private TextView tvError;
     private ServerInfoAdapter serverInfoAdapter;
