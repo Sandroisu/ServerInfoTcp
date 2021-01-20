@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.10.6.100</domain>
+        <domain includeSubdomains="true">cic.it-serv.ru</domain>
+        <domain includeSubdomains="true">kes.it-serv.ru</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

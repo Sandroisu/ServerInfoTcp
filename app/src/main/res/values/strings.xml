@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">ServerInfoTCP</string>
+    <string name="app_name">TCP Monitor</string>
     <string name="reconnect">Подключится повторно</string>
-    <string name="send">Отправить</string>
+    <string name="send">Отправить пароль</string>
     <string name="time">Time</string>
-    <string name="mbits">MBits</string>
+    <string name="mbits">Kb/s</string>
     <string name="net">NET</string>
     <string name="address_server">Адрес сервера</string>
     <string name="port">Порт</string>
@@ -18,4 +18,5 @@
     <string name="iotop">IOTOP</string>
     <string name="choose_disk">Выберите диск</string>
     <string name="net_log">NET-LOG</string>
+    <string name="mb">MB</string>
 </resources>

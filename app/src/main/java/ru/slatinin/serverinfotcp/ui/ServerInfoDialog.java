@@ -1,13 +1,18 @@
 package ru.slatinin.serverinfotcp.ui;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,19 +44,39 @@ public class ServerInfoDialog extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_fragment_server_info, container, false);
-        final Button close = v.findViewById(R.id.dialog_fragment_accept);
-        final EditText serverAddress = v.findViewById(R.id.dialog_fragment_address);
+        try {
+            PackageInfo pInfo = requireContext().getPackageManager().getPackageInfo(requireContext().getPackageName(), 0);
+            String version = pInfo.versionName;
+            TextView tvVersion = v.findViewById(R.id.dialog_fragment_version);
+            tvVersion.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        final Button accept = v.findViewById(R.id.dialog_fragment_accept);
+        final AutoCompleteTextView serverAddress = v.findViewById(R.id.dialog_fragment_address);
         final EditText serverPort = v.findViewById(R.id.dialog_fragment_port);
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         String address = sharedPreferences.getString(ADDRESS, "");
         String port = sharedPreferences.getString(PORT, "");
         if (!emptyOrNull(address)) {
-            serverAddress.setText(address);
+            String [] addresses = address.split("\\)\\(");
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_dropdown_item_1line, addresses);
+            serverAddress.setAdapter(arrayAdapter);
+            serverAddress.setThreshold(1);
+            serverAddress.setOnFocusChangeListener((view, hasFocus) -> {
+                if (view.getId() == R.id.dialog_fragment_address && hasFocus){
+                    AutoCompleteTextView a = (AutoCompleteTextView) view;
+                    a.showDropDown();
+                }
+            });
         }
         if (!emptyOrNull(port)) {
             serverPort.setText(port);
+        }else {
+            serverPort.setText("3981");
         }
-        close.setOnClickListener(v1 -> {
+        accept.setOnClickListener(v1 -> {
             if (emptyOrNull(serverAddress.getText().toString())) {
                 Toast.makeText(requireContext(), "Заполните поле адрес сервера", Toast.LENGTH_SHORT).show();
                 return;
@@ -63,7 +88,7 @@ public class ServerInfoDialog extends DialogFragment {
             FragmentActivity activity = requireActivity();
             App app = (App) activity.getApplication();
             app.connect(serverAddress.getText().toString(), serverPort.getText().toString());
-            onConnectAttempt.onConnectAttempt();
+            onConnectAttempt.onConnectAttempt(serverAddress.getText().toString());
             dismiss();
         });
         return v;

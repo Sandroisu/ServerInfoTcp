@@ -10,12 +10,11 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <ImageView
+    <ru.slatinin.serverinfotcp.DownloadPdfView
         android:id="@+id/item_server_pdf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:src="@drawable/ic_pdf"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

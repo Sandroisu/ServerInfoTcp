@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
+import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
@@ -68,13 +70,13 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     private ConstraintLayout clIoTop;
     private ConstraintLayout clNetLog;
 
-    private ImageView ivCpuPdf;
-    private ImageView ivMemPdf;
-    private ImageView ivNetPdf;
-    private ImageView ivDfPdf;
-    private ImageView ivIoTopPdf;
-    private ImageView ivNetLogPdf;
+    private DownloadPdfView ivCpuPdf;
+    private DownloadPdfView ivMemPdf;
+    private DownloadPdfView ivNetPdf;
+    private DownloadPdfView ivIoTopPdf;
+    private DownloadPdfView ivNetLogPdf;
     private ImageView ivPsqlPdf;
+    private ImageView ivDfPdf;
 
     private String ip;
 
@@ -86,6 +88,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         app.addTcpChangeListener(this);
         ip = getIntent().getStringExtra(MainActivity.IP);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Мониторинг серверов");
         getSupportActionBar().setSubtitle(ip);
 
         lcNet = findViewById(R.id.da_net);
@@ -134,11 +137,11 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
             ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
             reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         });
-        ivCpuPdf.setOnClickListener(v -> openBrowser(app, "cpu"));
-        ivMemPdf.setOnClickListener(v -> openBrowser(app, TOP));
-        ivNetPdf.setOnClickListener(v -> openBrowser(app, NET));
-        ivIoTopPdf.setOnClickListener(v -> openBrowser(app, IOTOP));
-        ivNetLogPdf.setOnClickListener(v -> openBrowser(app, NET_LOG));
+        ivCpuPdf.setUrl(UrlUtil.getUrl(ip, "cpu", this), ip + "cpu.pdf");
+        ivMemPdf.setUrl(UrlUtil.getUrl(ip, TOP, this), ip + TOP + ".pdf");
+        ivNetPdf.setUrl(UrlUtil.getUrl(ip, NET, this), ip + NET + ".pdf");
+        ivIoTopPdf.setUrl(UrlUtil.getUrl(ip, IOTOP, this), ip + IOTOP + ".pdf");
+        ivNetLogPdf.setUrl(UrlUtil.getUrl(ip, NET_LOG, this), ip + NET_LOG + ".pdf");
 
         for (int i = 0; i < app.getInfoHolder().getSingleInfoList().size(); i++) {
             if (app.getInfoHolder().getSingleInfoList().get(i).ip.equals(ip)) {
@@ -157,7 +160,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     @Override
-    public void updateTcpInfo(SingleInfo info, String dataInfo) {
+    public void updateTcpInfo(SingleInfo info, String dataInfo, int position) {
         runOnUiThread(() -> {
             if (!info.ip.equals(ip)) {
                 return;
@@ -288,7 +291,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     }
 
     @Override
-    public void onConnectAttempt() {
+    public void onConnectAttempt(String address) {
         btnReconnect.setVisibility(View.GONE);
         tvError.setVisibility(View.GONE);
     }
@@ -301,18 +304,4 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         return super.onOptionsItemSelected(item);
     }
 
-    private void openBrowser(App app, String type) {
-        if (app.getServerArgs() != null) {
-            String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3A" + type + "-monitor.prpt/generatedContent?c_server="
-                    + ip + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
-            if (url.contains("//")) {
-                url = url.replace("//", "/");
-            }
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(url));
-            startActivity(browserIntent);
-        } else {
-            Toast.makeText(app, "Невозможно получить файл", Toast.LENGTH_SHORT).show();
-        }
-    }
 }

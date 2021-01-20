@@ -24,6 +24,7 @@ import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
+import static ru.slatinin.serverinfotcp.ui.MainActivity.REPO;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
 public class App extends Application {
@@ -57,7 +58,6 @@ public class App extends Application {
     }
 
     public void connect(String address, String port) {
-        saveAddressAndPort(address, port);
         Thread thread = new Thread(() -> {
             if (tcpClient != null) {
                 tcpClient.stopClient();
@@ -67,10 +67,12 @@ public class App extends Application {
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
                     if (ARGS.equals(dataInfo)) {
                         serverArgs = new ServerArgs(objects[0]);
+                        saveRepo(serverArgs.repos);
+                        saveAddressAndPort(address, port);
                         return;
                     }
                     int position = -1;
-                    if (DF.equals(dataInfo) || IOTOP.equals(dataInfo)||PSQL.equals(dataInfo)) {
+                    if (DF.equals(dataInfo) || IOTOP.equals(dataInfo) || PSQL.equals(dataInfo)) {
                         SingleInfo info = new SingleInfo(ip, dataInfo);
                         info.init(dataInfo, objects);
                         position = infoHolder.updateOrAddInfo(info, dataInfo);
@@ -84,7 +86,7 @@ public class App extends Application {
                     }
                     if (position >= 0) {
                         for (OnTcpInfoReceived listener : listenersList) {
-                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position), dataInfo);
+                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position), dataInfo, position);
                         }
                     }
                 }
@@ -103,9 +105,27 @@ public class App extends Application {
 
     private void saveAddressAndPort(String address, String port) {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String prefAddress = sharedPreferences.getString(ADDRESS, "");
+        StringBuilder sb = new StringBuilder();
+        if (!prefAddress.isEmpty()) {
+            String[] playlists = prefAddress.split("\\)\\(");
+            for (int i = 0; i < playlists.length; i++) {
+                if (!playlists[i].equals(address)) {
+                    sb.append(playlists[i]).append(")(");
+                }
+            }
+        }
+        sb.append(address).append(")(");
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(ADDRESS, address);
+        editor.putString(ADDRESS, sb.toString());
         editor.putString(PORT, port);
+        editor.apply();
+    }
+
+    private void saveRepo(String repo) {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(REPO, repo);
         editor.apply();
     }
 

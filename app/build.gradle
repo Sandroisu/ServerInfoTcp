@@ -1,3 +1,5 @@
+import java.text.DecimalFormat
+
 plugins {
     id 'com.android.application'
 }
@@ -11,8 +13,8 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
-
+        versionName getVersion()
+        setProperty("archivesBaseName", getVersion())
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,4 +43,32 @@ dependencies {
 repositories {
     maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     mavenCentral()
+
+
+}
+
+static def startOfDay() {
+    def now = new Date().getTime()
+    def start = Date.parse("yyyy-MM-dd hh:mm:ss", "2021-01-19 0:00:00").getTime()
+
+    return new DecimalFormat("#").format(Math.floor(Math.abs(now - start) / (1000 * 3600 * 24)))
+}
+
+static def minuteOfDay() {
+    def now = new Date()
+    return (now.format("HH").toInteger() * 60) + now.format("mm").toInteger()
+}
+
+static def getRelease() {
+    /**
+     * 0 – альфа (прототип);
+     * 1 – бета (бета);
+     * 2 – выпуск-кандидат (передан на тестирование заказчику);
+     * 3 – публичный выпуск (окончательно передан заказчику).
+     */
+    return 3
+}
+
+static def getVersion() {
+    return "1." + startOfDay() + "." + getRelease() + "." + minuteOfDay()
 }

@@ -1,18 +1,27 @@
 package ru.slatinin.serverinfotcp.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
+import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
@@ -25,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     public static final String ADDRESS = "ru.slatinin.serverinfotcp.address";
     public static final String PORT = "ru.slatinin.serverinfotcp.port";
     public static final String IP = "ru.slatinin.serverinfotcp.ip";
+    public static final String REPO = "ru.slatinin.serverinfotcp.repo";
     private TcpClient mTcpClient;
     private TextView tvError;
     private ServerInfoAdapter serverInfoAdapter;
@@ -33,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Мониторинг серверов");
         App app = (App) getApplication();
         infoHolder = app.getInfoHolder();
         setContentView(R.layout.activity_main);
@@ -42,21 +53,6 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         mRecyclerView.setAdapter(serverInfoAdapter);
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
         serverInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
-        Button reconnect = findViewById(R.id.activity_main_reconnect);
-        reconnect.setOnClickListener(v -> {
-            ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
-            reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
-        });
-        Button send = findViewById(R.id.activity_main_send);
-        send.setOnClickListener(v -> {
-            Thread thread = new Thread(() -> {
-                mTcpClient = app.getTcpClient();
-                if (mTcpClient != null) {
-                    mTcpClient.sendMessage("Hello, World!!!");
-                }
-            });
-            thread.start();
-        });
         tvError = findViewById(R.id.activity_main_error);
     }
 
@@ -71,15 +67,14 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     }
 
     @Override
-    public void updateTcpInfo(SingleInfo info, String dataInfo) {
-        runOnUiThread(() ->
-
-                serverInfoAdapter.notifyDataSetChanged());
+    public void updateTcpInfo(SingleInfo info, String dataInfo, int position) {
+        runOnUiThread(() -> serverInfoAdapter.notifyDataSetChanged());
     }
 
     @Override
     public void showError(String errorMessage) {
         runOnUiThread(() -> {
+            getSupportActionBar().setSubtitle("");
             tvError.setText(errorMessage);
             tvError.setVisibility(View.VISIBLE);
             Toast.makeText(MainActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
@@ -101,29 +96,39 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     }
 
     @Override
-    public void onOpenBrowser(String ip) {
-        App app = (App) getApplication();
-        if (app.getServerArgs() != null) {
-            String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3Atcp-monitor.prpt/generatedContent?c_server="
-                    + ip + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
-            if (url.contains("//")) {
-                url = url.replace("//", "/");
-            }
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(url));
-            startActivity(browserIntent);
-        } else {
-            Toast.makeText(app, "Невозможно получить файл", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
     public void onRedSignal(ImageView signal) {
         runOnUiThread(() -> signal.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_server_problem_signal_24)));
     }
 
     @Override
-    public void onConnectAttempt() {
+    public void onConnectAttempt(String address) {
+        getSupportActionBar().setSubtitle(address);
         tvError.setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.main_menu_reconnect) {
+            ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
+            reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
+        }
+        if (item.getItemId() == R.id.main_menu_send) {
+            App app = (App) getApplication();
+            Thread thread = new Thread(() -> {
+                mTcpClient = app.getTcpClient();
+                if (mTcpClient != null) {
+                    mTcpClient.sendMessage("Hello, World!!!");
+                }
+            });
+            thread.start();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

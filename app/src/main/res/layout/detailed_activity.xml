@@ -56,7 +56,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
+            <ru.slatinin.serverinfotcp.DownloadPdfView
                 android:id="@+id/da_net_pdf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -110,12 +110,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:rotation="-90"
-                android:text="@string/mbits"
+                android:text="@string/mb"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
+            <ru.slatinin.serverinfotcp.DownloadPdfView
                 android:id="@+id/da_net_log_pdf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -183,7 +183,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/da_top_common" />
 
-            <ImageView
+            <ru.slatinin.serverinfotcp.DownloadPdfView
                 android:id="@+id/da_cpu_load_pdf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -229,7 +229,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true" />
 
-                <ImageView
+                <ru.slatinin.serverinfotcp.DownloadPdfView
                     android:id="@+id/da_top_mem_pdf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -309,7 +309,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true" />
 
-                <ImageView
+                <ru.slatinin.serverinfotcp.DownloadPdfView
                     android:id="@+id/da_iotop_pdf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

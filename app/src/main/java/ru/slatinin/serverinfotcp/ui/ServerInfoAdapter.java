@@ -23,12 +23,13 @@ import com.github.mikephil.charting.components.Legend;
 
 import java.util.List;
 
+import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
 
-import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
 
@@ -54,6 +55,20 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         holder.bind(singleInfoList.get(position));
     }
 
+    public List<SingleInfo> getSingleInfoList() {
+        return singleInfoList;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     @Override
     public int getItemCount() {
         return singleInfoList.size();
@@ -69,7 +84,9 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         private final ImageView ivSignal;
         private final ConstraintLayout clNet;
         private final ConstraintLayout clIoTop;
+        private final DownloadPdfView dpvDownloadPdf;
         private String ip;
+        private String repo;
         private final OnServerInfoHolderClickListener listener;
         private final Context mContext;
 
@@ -86,13 +103,11 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             ivSignal = itemView.findViewById(R.id.item_server_signal);
             clNet = itemView.findViewById(R.id.item_server_net_block);
             clIoTop = itemView.findViewById(R.id.item_server_iotop_block);
-            ImageView ivPdf = itemView.findViewById(R.id.item_server_pdf);
+            dpvDownloadPdf = itemView.findViewById(R.id.item_server_pdf);
             ChartUtil.initLineChart(lcCPU, true, false, true);
             ChartUtil.initBarChart(bcMem, false, false, false, true, Legend.LegendForm.CIRCLE);
-            itemView.setOnClickListener(this);
-            lcCPU.setOnClickListener(this);
-            bcMem.setOnClickListener(this);
-            ivPdf.setOnClickListener(this);
+
+            tvIp.setOnClickListener(this);
         }
 
         protected void bind(SingleInfo info) {
@@ -104,6 +119,8 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             if (ip == null) {
                 ip = info.ip;
                 tvIp.setText(ip);
+                String url = UrlUtil.getUrl(ip, "tcp", mContext);
+                dpvDownloadPdf.setUrl(url, "tcp-monitor.PDF");
             }
             switch (info.dataInfo) {
                 case NET:
@@ -123,13 +140,10 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         @Override
         public void onClick(View v) {
             if (listener != null && ip != null) {
-                if (v.getId() == R.id.item_server_pdf) {
-                    listener.onOpenBrowser(ip);
-                } else {
-                    listener.onClicked(ip);
-                }
+                listener.onClicked(ip);
             }
         }
+
     }
 
     private static boolean isNumeric(String str) {
@@ -196,8 +210,6 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
 
     public interface OnServerInfoHolderClickListener {
         void onClicked(String ip);
-
-        void onOpenBrowser(String ip);
 
         void onRedSignal(ImageView signal);
     }

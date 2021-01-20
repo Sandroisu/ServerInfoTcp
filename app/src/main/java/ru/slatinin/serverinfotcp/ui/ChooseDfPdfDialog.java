@@ -1,31 +1,27 @@
 package ru.slatinin.serverinfotcp.ui;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.List;
 import java.util.Objects;
 
-import ru.slatinin.serverinfotcp.App;
+import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 
-public class ChooseDfPdfDialog extends DialogFragment {
+public class ChooseDfPdfDialog extends DialogFragment implements DownloadPdfView.OnCloseDialogListener {
     private ServerDFList serverDFList;
     private List<ServerPSQL> serverPSQLList;
     private final String ip;
@@ -71,26 +67,11 @@ public class ChooseDfPdfDialog extends DialogFragment {
             textView.setText(name);
             textView.setLayoutParams(ivLayoutParams);
             linearLayout.addView(textView);
-            ImageView imageView = new ImageView(requireContext());
-            imageView.setLayoutParams(ivLayoutParams);
-            imageView.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_pdf));
-            linearLayout.addView(imageView);
-            imageView.setOnClickListener(v1 -> {
-                App app = (App) requireActivity().getApplication();
-                if (app.getServerArgs() != null) {
-                    String url = App.BASE_URL + app.getServerArgs().repos + "/%3Ahome%3Atcp%3A" + monitor + "-monitor.prpt/generatedContent?c_server="
-                            + ip + parameter + name + "&userid=tcp&password=monitor-0&output-target=pageable/pdf";
-                    if (url.contains("//")) {
-                        url = url.replace("//", "/");
-                    }
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(url));
-                    startActivity(browserIntent);
-                } else {
-                    Toast.makeText(app, "Невозможно получить файл", Toast.LENGTH_SHORT).show();
-                }
-                dismiss();
-            });
+            DownloadPdfView downloadPdfView = new DownloadPdfView(requireActivity(),null);
+            downloadPdfView.setLayoutParams(ivLayoutParams);
+            linearLayout.addView(downloadPdfView);
+            downloadPdfView.setOnCloseDialogListener(this);
+            downloadPdfView.setUrl(UrlUtil.getUrl(ip, monitor, parameter + name, requireContext()), ip + monitor + name + ".pdf");
         }
         return v;
     }
@@ -102,4 +83,8 @@ public class ChooseDfPdfDialog extends DialogFragment {
         Objects.requireNonNull(Objects.requireNonNull(Objects.requireNonNull(getDialog())).getWindow()).setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     }
 
+    @Override
+    public void onCloseDialog() {
+        dismiss();
+    }
 }
