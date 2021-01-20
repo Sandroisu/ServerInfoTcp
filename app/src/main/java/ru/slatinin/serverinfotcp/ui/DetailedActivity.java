@@ -28,6 +28,7 @@ import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
+import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
@@ -124,13 +125,13 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.initLineChart(lcCpuInfo, true, false, true);
         ChartUtil.initLineChart(lcPsqlXac, false, true, false);
         ChartUtil.initLineChart(lcPsqlNbe, false, true, false);
-        ChartUtil.initBarChart(bcTopMem, true, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcTopSwap, true, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcTopCpu, false, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcIoTopSpeed, true, false, true, false, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcIoTopTotal, true, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopMem,true, false, true, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopCpu, true,false, true, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcIoTopSpeed, true, false, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcIoTopTotal, true,false, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopSwap, true,false, false, false, true, Legend.LegendForm.CIRCLE);
         ChartUtil.initPieChart(pcTopTasks);
-        ChartUtil.initBarChart(bcDiskInfo, true, false, true, false, Legend.LegendForm.NONE);
+        ChartUtil.initBarChart(bcDiskInfo, true,false, false, true, false, Legend.LegendForm.NONE);
 
         btnReconnect = findViewById(R.id.da_reconnect);
         btnReconnect.setOnClickListener(v -> {
@@ -187,6 +188,10 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
                     break;
             }
         });
+    }
+
+    @Override
+    public void createTcpInfo(InfoHolder holder) {
 
     }
 
@@ -198,7 +203,6 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
             tvError.setText(errorMessage);
         });
     }
-
 
     private void updateTop(ServerTOP serverTOP) {
         if (serverTOP == null) {

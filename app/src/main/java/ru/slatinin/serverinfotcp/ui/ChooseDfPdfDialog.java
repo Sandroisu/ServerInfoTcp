@@ -40,8 +40,13 @@ public class ChooseDfPdfDialog extends DialogFragment implements DownloadPdfView
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_fragment_choose_pdf, container, false);
+
         LinearLayout verticalContainer = v.findViewById(R.id.cp_vertical_container);
         boolean isDF = serverPSQLList == null;
+        if (!isDF){
+            TextView tvTitle = v.findViewById(R.id.cp_title);
+            tvTitle.setText("Выберите базу данных");
+        }
         int size = isDF ? serverDFList.singleServerDFList.size() : serverPSQLList.size();
         String monitor = isDF ? "df" : "psql";
         String parameter = isDF ? "&c_disk=" : "&c_db=";

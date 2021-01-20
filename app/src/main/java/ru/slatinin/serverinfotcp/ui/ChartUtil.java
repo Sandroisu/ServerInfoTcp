@@ -49,7 +49,7 @@ import static ru.slatinin.serverinfotcp.server.ServerNET.N_SENT;
 
 public class ChartUtil {
 
-    public static void initBarChart(BarChart barChart, boolean yAxisEnable, boolean descriptionEnable, boolean xAxisEnabled,
+    public static void initBarChart(BarChart barChart, boolean leftAxisEnable, boolean rightAxisEnable, boolean descriptionEnable, boolean xAxisEnabled,
                                     boolean wordWrapEnabled, Legend.LegendForm form) {
         barChart.setDrawBarShadow(false);
         barChart.setDrawValueAboveBar(true);
@@ -60,14 +60,18 @@ public class ChartUtil {
         xAxis.setEnabled(xAxisEnabled);
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setAxisMinimum(0f);
-        leftAxis.setEnabled(false);
+        leftAxis.setLabelCount(4, false);
+        leftAxis.setGranularityEnabled(true);
+        leftAxis.setGranularity(0.1f);
+        barChart.setExtraTopOffset(10f);
+        leftAxis.setEnabled(leftAxisEnable);
         YAxis rightAxis = barChart.getAxisRight();
         rightAxis.setLabelCount(4, false);
         rightAxis.setAxisMinimum(0f);
         rightAxis.setGranularityEnabled(true);
         rightAxis.setGranularity(0.1f);
         barChart.setExtraTopOffset(10f);
-        rightAxis.setEnabled(yAxisEnable);
+        rightAxis.setEnabled(rightAxisEnable);
         Legend legend = barChart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
@@ -195,9 +199,9 @@ public class ChartUtil {
         barDataSets.add(set1);
         barDataSets.add(set);
         if (showSpeed) {
-            setMbMemoryAxisFormatter(barChart.getAxisRight());
+            setMbMemoryAxisFormatter(barChart.getAxisLeft());
         } else {
-            setGbMemoryAxisFormatter(barChart.getAxisRight());
+            setGbMemoryAxisFormatter(barChart.getAxisLeft());
         }
         setMemoryBarFormatter(set1);
         setMemoryBarFormatter(set);
@@ -317,7 +321,7 @@ public class ChartUtil {
         BarData data = new BarData(barDataSets);
         data.setValueTextSize(8f);
         data.setDrawValues(drawValues);
-        setGbMemoryAxisFormatter(barChart.getAxisRight());
+        setGbMemoryAxisFormatter(barChart.getAxisLeft());
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         barChart.setData(data);
         barChart.getBarData().setBarWidth(0.9f);
@@ -340,7 +344,17 @@ public class ChartUtil {
                     entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_numbackends));
                 }
             }
-            LineDataSet set = createLineChartSet(new LineDataSet(entries, serverPsqlLists.get(0).get(j).c_datname), colors[j], false, 2f, true);
+            String datname = "";
+            if (serverPsqlLists.get(0).size() > j) {
+                datname = serverPsqlLists.get(0).get(j).c_datname;
+            }
+            int color;
+            if (colors.length <= j) {
+                color = Color.parseColor("#33691e");
+            } else {
+                color = colors[j];
+            }
+            LineDataSet set = createLineChartSet(new LineDataSet(entries, datname), color, false, 2f, true);
             dataSets.add(set);
         }
         LineData data = new LineData(dataSets);
@@ -390,7 +404,7 @@ public class ChartUtil {
         barChart.setData(data);
         XAxis xAxis = barChart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        setGbMemoryAxisFormatter(barChart.getAxisRight());
+        setGbMemoryAxisFormatter(barChart.getAxisLeft());
         barChart.groupBars(-0.2f, 0.1f, 0.01f);
         barChart.invalidate();
     }

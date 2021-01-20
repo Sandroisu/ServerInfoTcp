@@ -60,6 +60,11 @@ public class App extends Application {
         Thread thread = new Thread(() -> {
             if (tcpClient != null) {
                 tcpClient.stopClient();
+                infoHolder.clear();
+                infoHolder = new InfoHolder();
+                for (OnTcpInfoReceived listener : listenersList) {
+                    listener.createTcpInfo(infoHolder);
+                }
             }
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
@@ -117,7 +122,7 @@ public class App extends Application {
         sb.append(address).append(")(");
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(ADDRESS, sb.toString());
-        editor.putString(BASE_URL, "http://" + sb.toString());
+        editor.putString(BASE_URL, address);
         editor.putString(PORT, port);
         editor.apply();
     }

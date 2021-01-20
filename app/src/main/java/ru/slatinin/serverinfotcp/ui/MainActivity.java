@@ -35,23 +35,24 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     public static final String PORT = "ru.slatinin.serverinfotcp.port";
     public static final String IP = "ru.slatinin.serverinfotcp.ip";
     public static final String REPO = "ru.slatinin.serverinfotcp.repo";
-    public static final String BASE_URL = "ru.slatinin.serverinfotcp.repo";
+    public static final String BASE_URL = "ru.slatinin.serverinfotcp.base.url";
+
     private TcpClient mTcpClient;
     private TextView tvError;
     private ServerInfoAdapter serverInfoAdapter;
-    private InfoHolder infoHolder;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Мониторинг серверов");
         App app = (App) getApplication();
-        infoHolder = app.getInfoHolder();
+        InfoHolder infoHolder = app.getInfoHolder();
         setContentView(R.layout.activity_main);
-        RecyclerView mRecyclerView = findViewById(R.id.activity_main_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView = findViewById(R.id.activity_main_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleInfoList(), this);
-        mRecyclerView.setAdapter(serverInfoAdapter);
+        recyclerView.setAdapter(serverInfoAdapter);
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
         serverInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         tvError = findViewById(R.id.activity_main_error);
@@ -62,14 +63,20 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         super.onStart();
         App app = (App) getApplication();
         app.addTcpChangeListener(this);
-        if (infoHolder == null) {
-            infoHolder = app.getInfoHolder();
-        }
     }
 
     @Override
     public void updateTcpInfo(SingleInfo info, String dataInfo, int position) {
         runOnUiThread(() -> serverInfoAdapter.notifyDataSetChanged());
+    }
+
+    @Override
+    public void createTcpInfo(InfoHolder infoHolder) {
+        runOnUiThread(() -> {
+            serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleInfoList(), MainActivity.this);
+            recyclerView.setAdapter(serverInfoAdapter);
+        });
+
     }
 
     @Override
