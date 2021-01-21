@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "923664937903",
+    "project_id": "tcpserverinfo",
+    "storage_bucket": "tcpserverinfo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923664937903:android:0e84eec3c0224446f2b55a",
+        "android_client_info": {
+          "package_name": "ru.slatinin.serverinfotcp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "923664937903-7vnh99557nk8m710hv29tobsq0kvj95a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWyrrhFLtJM815tg6iBRk60OmrgqcwAV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "923664937903-7vnh99557nk8m710hv29tobsq0kvj95a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

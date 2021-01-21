@@ -2,8 +2,10 @@ import java.text.DecimalFormat
 
 plugins {
     id 'com.android.application'
-}
 
+}
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
@@ -31,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:26.3.0')
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -39,6 +42,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics'
 }
 repositories {
     maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }

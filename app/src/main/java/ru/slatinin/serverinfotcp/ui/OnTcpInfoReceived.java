@@ -1,3 +1,4 @@
+
 package ru.slatinin.serverinfotcp.ui;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
