@@ -228,7 +228,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     }
 
     private void updatePsql(List<List<ServerPSQL>> serverPSQLS) {
-        if (serverPSQLS == null || serverPSQLS.size() == 0) {
+        if (serverPSQLS == null || serverPSQLS.size() == 0 || serverPSQLS.get(0).size() == 0) {
             return;
         }
         if (clPsql.getVisibility() == View.GONE) {

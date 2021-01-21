@@ -1,8 +1,38 @@
 package ru.slatinin.serverinfotcp.server;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class JsonUtil {
+
+    public static JsonArray getJsonArray(JsonObject object, String key){
+        JsonArray array = new JsonArray();
+        if (object!=null && object.has(key)){
+            try {
+                array = object.getAsJsonArray(key);
+            }catch (UnsupportedOperationException e){
+                e.printStackTrace();
+            }
+        }else {
+            try {
+                array = object.getAsJsonArray();
+            }catch (UnsupportedOperationException e){
+                e.printStackTrace();
+            }
+        }
+        return array;
+    }
+
+    public static JsonObject getJsonObject(JsonObject jsonObject, String key) {
+        if (jsonObject != null && jsonObject.has(key)) {
+            try {
+                return jsonObject.getAsJsonObject(key);
+            } catch (UnsupportedOperationException e) {
+                e.printStackTrace();
+            }
+        }
+        return jsonObject;
+    }
 
     public static String getString(JsonObject object, String key) {
         if (object != null && object.has(key)) {

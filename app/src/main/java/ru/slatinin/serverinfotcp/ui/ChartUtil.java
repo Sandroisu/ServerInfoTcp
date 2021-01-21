@@ -1,10 +1,18 @@
 package ru.slatinin.serverinfotcp.ui;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -34,11 +42,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.ServerNET;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.serverdf.SingleServerDF;
+import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
 import ru.slatinin.serverinfotcp.server.servertop.BaseTopInfo;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
@@ -492,6 +502,59 @@ public class ChartUtil {
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
         Date date = new Date(millis);
         return formatter.format(date);
+    }
+
+    public static void buildTable(ServerIoTopList serverIoTopList, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
+        if (serverIoTopList == null || serverIoTopList.serverIoTopList.size() == 0) {
+            return;
+        }
+        if (clIoTop.getVisibility() == View.GONE) {
+            clIoTop.setVisibility(View.VISIBLE);
+        }
+        tlIotop.removeAllViews();
+        TableRow namesRow = new TableRow(mContext);
+        for (int i = 0; i < ServerIoTopList.columnNames.length; i++) {
+            TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, 0, 10, 0);
+            if (i > 0) {
+                layoutParams.gravity = Gravity.END;
+            }
+            TextView name = new TextView(mContext);
+            name.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+            String text = ServerIoTopList.columnNames[i] + " ";
+            name.setText(text);
+            name.setLayoutParams(layoutParams);
+            name.setPadding(0, 0, 1, 0);
+            name.setTextSize(12);
+            namesRow.addView(name);
+        }
+        tlIotop.addView(namesRow);
+        List<SingleIoTop> singleIoTopList = serverIoTopList.serverIoTopList;
+        for (int i = 0; i < singleIoTopList.size(); i++) {
+            if (singleIoTopList.get(i).isMoreThenOne) {
+                List<String> values = singleIoTopList.get(i).serverIoTopMapList;
+                TableRow valueRow = new TableRow(mContext);
+                for (int j = 0; j < values.size(); j++) {
+                    TableRow.LayoutParams params = new TableRow.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+                    params.setMargins(0, 1, 10, 0);
+                    TextView value = new TextView(mContext);
+                    if (j > 0) {
+                        params.gravity = Gravity.END;
+                    }
+                    value.setLayoutParams(params);
+                    value.setPadding(0, 0, 1, 0);
+                    value.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+                    String text = values.get(j) + " ";
+                    value.setText(text);
+                    value.setTextSize(12);
+                    valueRow.addView(value);
+                }
+                tlIotop.addView(valueRow);
+            }
+        }
     }
 
     public static int[] getBarChartColors(int size) {

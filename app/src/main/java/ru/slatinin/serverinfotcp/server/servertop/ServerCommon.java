@@ -17,6 +17,9 @@ public class ServerCommon extends BaseTopInfo {
     private final String UP_DAYS = "up_days";
     private final String USER = "user";
     private final String LOAD_AVERAGE = "load_average";
+    private final String N_LA1 = "n_la1";
+    private final String N_LA2 = "n_la2";
+    private final String N_LA3 = "n_la3";
 
     public String time;
     public String up_hours;
@@ -44,6 +47,12 @@ public class ServerCommon extends BaseTopInfo {
                     e.printStackTrace();
                 }
             }
+        }else {
+            if (object.has(N_LA1)&&object.has(N_LA2)&&object.has(N_LA3)){}
+            load_average = new float[3];
+            load_average[0] = JsonUtil.getFloat(object, N_LA1);
+            load_average[1] = JsonUtil.getFloat(object, N_LA2);
+            load_average[2] = JsonUtil.getFloat(object, N_LA3);
         }
     }
 

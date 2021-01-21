@@ -1,9 +1,14 @@
 package ru.slatinin.serverinfotcp.server.servertop;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.slatinin.serverinfotcp.server.JsonUtil;
 
@@ -14,54 +19,40 @@ public class ServerTOP {
     private final String CPU = "cpu";
     private final String MEM = "mem";
     private final String SWAP = "swap";
+    private final String JB_PROCESSES = "jb_processes";
+    private final String PROCESSES = "processes";
 
     public ServerCommon serverCommon;
     public ServerTasks serverTasks;
     public ServerSwap serverSWAP;
     public ServerMem serverMem;
     public ServerCpu serverCPU;
+    public List<ServerProcesses> serverProcesses;
 
     public ServerTOP(JsonObject object) {
-        serverCommon = new ServerCommon(object.get(TOP).getAsJsonObject());
-        serverTasks = new ServerTasks(object.get(TASKS).getAsJsonObject());
-        serverCPU = new ServerCpu(object.get(CPU).getAsJsonObject());
-        serverMem = new ServerMem(object.get(MEM).getAsJsonObject());
-        serverSWAP = new ServerSwap(object.get(SWAP).getAsJsonObject());
-    }
-
-    public String getInfo() {
-        StringBuilder info = new StringBuilder();
-        Field[] commonFields = serverCommon.getClass().getFields();
-            info.append(TOP + ":\n");
-        for (Field field : commonFields) {
-            info.append(field.getName()).append(": ").append(serverCommon.getValueByName(field.getName())).append("; ");
+        serverCommon = new ServerCommon(JsonUtil.getJsonObject(object, TOP));
+        serverTasks = new ServerTasks(JsonUtil.getJsonObject(object, TASKS));
+        serverCPU = new ServerCpu(JsonUtil.getJsonObject(object, CPU));
+        serverMem = new ServerMem(JsonUtil.getJsonObject(object, MEM));
+        serverSWAP = new ServerSwap(JsonUtil.getJsonObject(object, SWAP));
+        serverProcesses = new ArrayList<>();
+        JsonArray array;
+        if (object.has(JB_PROCESSES)) {
+            array = JsonUtil.getJsonArray(object, JB_PROCESSES);
+        } else {
+            array = JsonUtil.getJsonArray(object, PROCESSES);
         }
-        /*
-        info.append("\n");
-        info.append(TASKS + ":\n");
-        Field[] tasksFields = serverTasks.getClass().getFields();
-        for (Field field : tasksFields) {
-            info.append(field.getName()).append(": ").append(serverTasks.getValueByName(field.getName())).append("; ");
+        JsonArray innerArray;
+        if (array.isJsonArray() && array.size() > 0 && array.get(0).isJsonArray()) {
+            innerArray = array.get(0).getAsJsonArray();
+        } else {
+            innerArray = array;
         }
-        info.append("\n");
-        info.append(SWAP + ":\n");
-        Field[] swapFields = serverSWAP.getClass().getFields();
-        for (Field field : swapFields) {
-            info.append(field.getName()).append(": ").append(serverSWAP.getValueByName(field.getName())).append("; ");
+        for (int i = 0; i < innerArray.size(); i++) {
+            ServerProcesses serverProcess = new ServerProcesses(innerArray.get(i).getAsJsonObject());
+            serverProcesses.add(serverProcess);
         }
-        info.append("\n");
-        info.append(MEM + ":\n");
-        Field[] memFields = serverMem.getClass().getFields();
-        for (Field field : memFields) {
-            info.append(field.getName()).append(": ").append(serverMem.getValueByName(field.getName())).append("; ");
-        }
-        info.append("\n");
-        info.append(CPU + ":\n");
-        Field[] cpuFields = serverCPU.getClass().getFields();
-        for (Field field : cpuFields) {
-            info.append(field.getName()).append(": ").append(serverCPU.getValueByName(field.getName())).append("; ");
-        }
-         */
-        return info.toString();
     }
 }
+
+
