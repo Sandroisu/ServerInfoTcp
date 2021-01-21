@@ -20,38 +20,61 @@ import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
+import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 
-public class ChooseDfPdfDialog extends DialogFragment implements DownloadPdfView.OnCloseDialogListener {
-    private ServerDFList serverDFList;
-    private List<ServerPSQL> serverPSQLList;
+public class ChoosePdfDialog extends DialogFragment implements DownloadPdfView.OnCloseDialogListener {
     private final String ip;
+    private final String monitor;
+    private final String parameter;
+    private final String title;
+    private final String [] names;
+    private final int size;
 
-    public ChooseDfPdfDialog(ServerDFList serverDFList, String ip) {
-        this.serverDFList = serverDFList;
+    public ChoosePdfDialog(ServerDFList serverDFList, String ip) {
         this.ip = ip;
+        monitor = "df";
+        parameter = "&c_disk=";
+        size = serverDFList.singleServerDFList.size();
+        names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names [i] = serverDFList.singleServerDFList.get(i).c_name;
+        }
+        title = "Выберите диск";
     }
 
-    public ChooseDfPdfDialog(List<ServerPSQL> serverPSQLList, String ip) {
-        this.serverPSQLList = serverPSQLList;
+    public ChoosePdfDialog(List<ServerPSQL> serverPSQLList, String ip) {
         this.ip = ip;
+        monitor = "psql";
+        parameter = "&c_db=";
+        size = serverPSQLList.size();
+        names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names [i] = serverPSQLList.get(i).c_datname;
+        }
+        title = "Выберите базу данных";
+    }
+
+    public ChoosePdfDialog(ServerIoTopList serverIoTopList, String ip) {
+        this.ip = ip;
+        monitor = "iotop";
+        parameter = "&c_disk=";
+        size = serverIoTopList.serverIoTopList.size();
+        names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names [i] = serverIoTopList.serverIoTopList.get(i).c_device;
+        }
+        title = "Выберите диск";
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_fragment_choose_pdf, container, false);
+        TextView tvTitle = v.findViewById(R.id.cp_title);
+        tvTitle.setText(title);
         LinearLayout verticalContainer = v.findViewById(R.id.cp_vertical_container);
-        boolean isDF = serverPSQLList == null;
-        int size = isDF ? serverDFList.singleServerDFList.size() : serverPSQLList.size();
-        String monitor = isDF ? "df" : "psql";
-        String parameter = isDF ? "&c_disk=" : "&c_db=";
         for (int i = 0; i < size; i++) {
-            String name;
-            if (isDF) {
-                name = serverDFList.singleServerDFList.get(i).c_name;
-            } else {
-                name = serverPSQLList.get(i).c_datname;
-            }
+            String name = names[i];
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(25, 25, 25, 25);
@@ -71,7 +94,11 @@ public class ChooseDfPdfDialog extends DialogFragment implements DownloadPdfView
             downloadPdfView.setLayoutParams(ivLayoutParams);
             linearLayout.addView(downloadPdfView);
             downloadPdfView.setOnCloseDialogListener(this);
-            downloadPdfView.setUrl(UrlUtil.getUrl(ip, monitor, parameter + name, requireContext()), ip + monitor + name + ".pdf");
+            String fileName = ip + monitor + name + ".pdf";
+            if (fileName.contains("/")){
+                fileName = fileName.replace("/", "");
+            }
+            downloadPdfView.setUrl(UrlUtil.getUrl(ip, monitor, parameter + name, requireContext()), fileName);
         }
         return v;
     }

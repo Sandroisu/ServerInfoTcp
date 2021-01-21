@@ -105,7 +105,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             clIoTop = itemView.findViewById(R.id.item_server_iotop_block);
             dpvDownloadPdf = itemView.findViewById(R.id.item_server_pdf);
             ChartUtil.initLineChart(lcCPU, true, false, true);
-            ChartUtil.initBarChart(bcMem, false, false, false, true, Legend.LegendForm.CIRCLE);
+            ChartUtil.initBarChart(bcMem, false,false, false, false, true, Legend.LegendForm.CIRCLE);
 
             tvIp.setOnClickListener(this);
         }

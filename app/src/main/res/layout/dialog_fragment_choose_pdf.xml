@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/cp_vertical_container"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/cp_vertical_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/choose_disk"
-        android:textColor="@color/black"
-        android:textSize="24sp"
-        android:gravity="center"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/cp_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/choose_disk"
+            android:textColor="@color/black"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

@@ -23,13 +23,12 @@ import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
+import static ru.slatinin.serverinfotcp.ui.MainActivity.BASE_URL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.REPO;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
 public class App extends Application {
-
-    public final static String BASE_URL = "http://cic.it-serv.ru";
     private final String ARGS = "args";
 
     private ServerArgs serverArgs;
@@ -61,6 +60,11 @@ public class App extends Application {
         Thread thread = new Thread(() -> {
             if (tcpClient != null) {
                 tcpClient.stopClient();
+                infoHolder.clear();
+                infoHolder = new InfoHolder();
+                for (OnTcpInfoReceived listener : listenersList) {
+                    listener.createTcpInfo(infoHolder);
+                }
             }
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
@@ -118,6 +122,7 @@ public class App extends Application {
         sb.append(address).append(")(");
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(ADDRESS, sb.toString());
+        editor.putString(BASE_URL, address);
         editor.putString(PORT, port);
         editor.apply();
     }

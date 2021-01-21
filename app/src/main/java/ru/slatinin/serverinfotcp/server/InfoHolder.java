@@ -33,4 +33,7 @@ public class InfoHolder {
         return singleInfoList;
     }
 
+    public void clear() {
+        singleInfoList.clear();
+    }
 }

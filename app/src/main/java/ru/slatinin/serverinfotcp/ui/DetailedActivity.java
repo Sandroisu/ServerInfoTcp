@@ -1,7 +1,5 @@
 package ru.slatinin.serverinfotcp.ui;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,7 +7,6 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +25,7 @@ import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
+import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.ServerPSQL;
 import ru.slatinin.serverinfotcp.server.SingleInfo;
@@ -124,13 +122,13 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.initLineChart(lcCpuInfo, true, false, true);
         ChartUtil.initLineChart(lcPsqlXac, false, true, false);
         ChartUtil.initLineChart(lcPsqlNbe, false, true, false);
-        ChartUtil.initBarChart(bcTopMem, true, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcTopSwap, true, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcTopCpu, false, true, false, true, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcIoTopSpeed, true, false, true, false, Legend.LegendForm.CIRCLE);
-        ChartUtil.initBarChart(bcIoTopTotal, true, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopMem, true,false, true, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopSwap, true, false, true, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcTopCpu, true, false, true, false, true, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcIoTopSpeed, true,false, false, true, false, Legend.LegendForm.CIRCLE);
+        ChartUtil.initBarChart(bcIoTopTotal, true,false, false, true, false, Legend.LegendForm.CIRCLE);
         ChartUtil.initPieChart(pcTopTasks);
-        ChartUtil.initBarChart(bcDiskInfo, true, false, true, false, Legend.LegendForm.NONE);
+        ChartUtil.initBarChart(bcDiskInfo,  true, false, false, true, false, Legend.LegendForm.NONE);
 
         btnReconnect = findViewById(R.id.da_reconnect);
         btnReconnect.setOnClickListener(v -> {
@@ -140,7 +138,6 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ivCpuPdf.setUrl(UrlUtil.getUrl(ip, "cpu", this), ip + "cpu.pdf");
         ivMemPdf.setUrl(UrlUtil.getUrl(ip, TOP, this), ip + TOP + ".pdf");
         ivNetPdf.setUrl(UrlUtil.getUrl(ip, NET, this), ip + NET + ".pdf");
-        ivIoTopPdf.setUrl(UrlUtil.getUrl(ip, IOTOP, this), ip + IOTOP + ".pdf");
         ivNetLogPdf.setUrl(UrlUtil.getUrl(ip, NET_LOG, this), ip + NET_LOG + ".pdf");
 
         for (int i = 0; i < app.getInfoHolder().getSingleInfoList().size(); i++) {
@@ -191,6 +188,11 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
     }
 
     @Override
+    public void createTcpInfo(InfoHolder holder) {
+
+    }
+
+    @Override
     public void showError(String errorMessage) {
         runOnUiThread(() -> {
             tvError.setVisibility(View.VISIBLE);
@@ -220,8 +222,8 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         }
         ChartUtil.updateDiskInfo(serverDFList, bcDiskInfo);
         ivDfPdf.setOnClickListener(v -> {
-            ChooseDfPdfDialog chooseDfPdfDialog = new ChooseDfPdfDialog(serverDFList, ip);
-            chooseDfPdfDialog.show(getSupportFragmentManager(), "choose_df_dialog");
+            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverDFList, ip);
+            choosePdfDialog.show(getSupportFragmentManager(), "choose_df_dialog");
         });
     }
 
@@ -235,8 +237,8 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.updatePsqlList(serverPSQLS, lcPsqlXac, true);
         ChartUtil.updatePsqlList(serverPSQLS, lcPsqlNbe, false);
         ivPsqlPdf.setOnClickListener(v -> {
-            ChooseDfPdfDialog chooseDfPdfDialog = new ChooseDfPdfDialog(serverPSQLS.get(0), ip);
-            chooseDfPdfDialog.show(getSupportFragmentManager(), "choose_psql_dialog");
+            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverPSQLS.get(0), ip);
+            choosePdfDialog.show(getSupportFragmentManager(), "choose_psql_dialog");
         });
     }
 
@@ -247,8 +249,12 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         if (clIoTop.getVisibility() == View.GONE) {
             clIoTop.setVisibility(View.VISIBLE);
         }
-        ChartUtil.updateIoTopList(serverIoTopLists.serverIoTopList, bcIoTopSpeed, true);
-        ChartUtil.updateIoTopList(serverIoTopLists.serverIoTopList, bcIoTopTotal, false);
+        ChartUtil.updateIoTop(serverIoTopLists.serverIoTopList, bcIoTopSpeed, true);
+        ChartUtil.updateIoTop(serverIoTopLists.serverIoTopList, bcIoTopTotal, false);
+        ivIoTopPdf.setOnClickListener(v -> {
+            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverIoTopLists, ip);
+            choosePdfDialog.show(getSupportFragmentManager(), "choose_iotop_dialog");
+        });
     }
 
     private void updateNetLog(List<ServerNetLog> serverNetLogs) {
