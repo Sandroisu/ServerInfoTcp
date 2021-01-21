@@ -89,13 +89,13 @@ public class TcpClient {
 
                 while (mRun) {
                     String message = mBufferIn.readLine();
-                    if (message.length() > 16) {
+                    if (message != null && message.length() > 16) {
                         byte[] y = message.getBytes();
                         MetaPackage metaPackage = PackageUtil.readMeta(y, false);
                         PackageReadUtils packageReadUtils = new PackageReadUtils(y, false);
                         RPCResult[] results = packageReadUtils.getFromResult();
                         if (mMessageListener != null && results.length > 0 && metaPackage != null) {
-                            if (results.length > 0 && results[0].result != null) {
+                            if (results[0].result != null) {
                                 mMessageListener.onServerMessageReceived(results[0].result.records, metaPackage.id, metaPackage.dataInfo);
                             }
                         }

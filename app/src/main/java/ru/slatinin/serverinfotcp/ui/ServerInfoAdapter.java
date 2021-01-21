@@ -86,7 +86,6 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         private final ConstraintLayout clIoTop;
         private final DownloadPdfView dpvDownloadPdf;
         private String ip;
-        private String repo;
         private final OnServerInfoHolderClickListener listener;
         private final Context mContext;
 
@@ -104,8 +103,9 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             clNet = itemView.findViewById(R.id.item_server_net_block);
             clIoTop = itemView.findViewById(R.id.item_server_iotop_block);
             dpvDownloadPdf = itemView.findViewById(R.id.item_server_pdf);
-            ChartUtil.initLineChart(lcCPU, true, false, true);
-            ChartUtil.initBarChart(bcMem, false,false, false, false, true, Legend.LegendForm.CIRCLE);
+            ChartUtil.initLineChart(lcCPU, true);
+            ChartUtil.initBarChart(bcMem, false, false,
+                    false, true);
 
             tvIp.setOnClickListener(this);
         }
@@ -131,7 +131,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
                     tvNet.setText(netInfo);
                     break;
                 case TOP:
-                    ChartUtil.updateTopBarChart(info.getServerTOP().serverMem, bcMem, true);
+                    ChartUtil.updateTopBars(info.getServerTOP().serverMem, bcMem, true);
                     ChartUtil.updateCpuList(info.getServerCommonList(), lcCPU);
                     break;
             }
@@ -192,7 +192,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
 
                     params.setMargins(0, 1, 10, 0);
                     TextView value = new TextView(mContext);
-                    if (isNumeric(values.get(j))) {
+                    if (j > 0) {
                         params.gravity = Gravity.END;
                     }
                     value.setLayoutParams(params);

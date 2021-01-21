@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
+import ru.slatinin.serverinfotcp.server.JsonUtil;
+
 public class ServerTOP {
 
     private final String TOP = "top";

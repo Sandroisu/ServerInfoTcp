@@ -21,14 +21,17 @@ import ru.slatinin.serverinfotcp.ui.OnTcpInfoReceived;
 
 import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
+import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
+import static ru.slatinin.serverinfotcp.server.SingleInfo.NET_LOG;
 import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
+import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.BASE_URL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.REPO;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
-public class App extends Application {
+public class App extends Application implements CallSqlQueryListener {
     private final String ARGS = "args";
 
     private ServerArgs serverArgs;
@@ -45,7 +48,7 @@ public class App extends Application {
                     "TcpClientChannel", NotificationManager.IMPORTANCE_DEFAULT);
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
         }
-        infoHolder = new InfoHolder();
+        infoHolder = new InfoHolder(this);
         listenersList = new ArrayList<>();
         Intent intent = new Intent();
         intent.setClass(this, TcpService.class);
@@ -57,35 +60,40 @@ public class App extends Application {
     }
 
     public void connect(String address, String port) {
-        Thread thread = new Thread(() -> {
-            if (tcpClient != null) {
-                tcpClient.stopClient();
-                infoHolder.clear();
-                infoHolder = new InfoHolder();
-                for (OnTcpInfoReceived listener : listenersList) {
-                    listener.createTcpInfo(infoHolder);
-                }
+        if (tcpClient != null) {
+            tcpClient.stopClient();
+            infoHolder.clear();
+            infoHolder = new InfoHolder(this);
+            for (OnTcpInfoReceived listener : listenersList) {
+                listener.createTcpInfo(infoHolder);
             }
+        }
+        Thread thread = new Thread(() -> {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
                     if (ARGS.equals(dataInfo)) {
                         serverArgs = new ServerArgs(objects[0]);
                         saveRepo(serverArgs.repos);
-                        saveAddressAndPort(address, port);
                         return;
                     }
                     int position = -1;
                     if (DF.equals(dataInfo) || IOTOP.equals(dataInfo) || PSQL.equals(dataInfo)) {
                         SingleInfo info = new SingleInfo(ip, dataInfo);
                         info.init(dataInfo, objects);
-                        position = infoHolder.updateOrAddInfo(info, dataInfo);
+                        position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
 
                     } else {
-                        for (JsonObject object : objects) {
+                        if (objects.length > 1) {
                             SingleInfo info = new SingleInfo(ip, dataInfo);
-                            info.init(dataInfo, object);
-                            position = infoHolder.updateOrAddInfo(info, dataInfo);
+                            info.init(dataInfo, objects);
+                            position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
+                        } else {
+                            for (JsonObject object : objects) {
+                                SingleInfo info = new SingleInfo(ip, dataInfo);
+                                info.init(dataInfo, object);
+                                position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
+                            }
                         }
                     }
                     if (position >= 0) {
@@ -154,4 +162,42 @@ public class App extends Application {
         return serverArgs;
     }
 
+    @Override
+    public void onMustCallOldData(String dataInfo, String ip) {
+        String databaseName = "";
+        String limit = "";
+        switch (dataInfo) {
+            case TOP:
+                databaseName = "dbo.cd_top";
+                limit = "50";
+                break;
+            case NET_LOG:
+                databaseName = "dbo.cd_net_log";
+                limit = "50";
+                break;
+            case NET:
+                databaseName = "dbo.cd_net";
+                limit = "50";
+                break;
+            case PSQL:
+                databaseName = "dbo.cd_psql";
+                limit = "7";
+                break;
+            default:
+                break;
+        }
+        if (databaseName.isEmpty()) {
+            return;
+        }
+        if (tcpClient != null) {
+            String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
+                    + " where c_ip = '" + ip + "' order by id desc limit " + limit;
+            tcpClient.sendMessage(query);
+        }
+    }
+
+    @Override
+    public void onSaveAddressAndPort(String address, String port) {
+        saveAddressAndPort(address, port);
+    }
 }

@@ -17,16 +17,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
-import ru.slatinin.serverinfotcp.ui.MainActivity;
 
 import static android.content.Context.MODE_PRIVATE;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
@@ -58,7 +55,7 @@ public class ServerInfoDialog extends DialogFragment {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         String address = sharedPreferences.getString(ADDRESS, "");
         String port = sharedPreferences.getString(PORT, "");
-        if (!emptyOrNull(address)) {
+        if (!address.isEmpty()) {
             String [] addresses = address.split("\\)\\(");
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(requireContext(),
                     android.R.layout.simple_dropdown_item_1line, addresses);
@@ -71,17 +68,17 @@ public class ServerInfoDialog extends DialogFragment {
                 }
             });
         }
-        if (!emptyOrNull(port)) {
+        if (!port.isEmpty()) {
             serverPort.setText(port);
         }else {
             serverPort.setText("3981");
         }
         accept.setOnClickListener(v1 -> {
-            if (emptyOrNull(serverAddress.getText().toString())) {
+            if (serverAddress.getText().toString().isEmpty()) {
                 Toast.makeText(requireContext(), "Заполните поле адрес сервера", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (emptyOrNull(serverAddress.getText().toString())) {
+            if (serverAddress.getText().toString().isEmpty()) {
                 Toast.makeText(requireContext(), "Заполните поле порт сервера", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -101,7 +98,4 @@ public class ServerInfoDialog extends DialogFragment {
         Objects.requireNonNull(Objects.requireNonNull(Objects.requireNonNull(getDialog())).getWindow()).setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
     }
 
-    private boolean emptyOrNull(String toBeChecked) {
-        return toBeChecked.isEmpty();
-    }
 }
