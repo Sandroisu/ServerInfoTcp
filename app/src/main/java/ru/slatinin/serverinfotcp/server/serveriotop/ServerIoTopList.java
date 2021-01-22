@@ -3,6 +3,7 @@ package ru.slatinin.serverinfotcp.server.serveriotop;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ServerIoTopList {
@@ -16,6 +17,9 @@ public class ServerIoTopList {
         for (JsonObject obj : object) {
             SingleIoTop singleIoTop = new SingleIoTop(obj);
             serverIoTopList.add(singleIoTop);
+        }
+        if (object.length > 0 && object[0].has("dx_created")) {
+            Collections.reverse(serverIoTopList);
         }
     }
 

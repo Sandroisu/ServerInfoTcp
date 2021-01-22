@@ -18,7 +18,7 @@ import java.util.Objects;
 import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
-import ru.slatinin.serverinfotcp.server.ServerPSQL;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 
@@ -42,14 +42,14 @@ public class ChoosePdfDialog extends DialogFragment implements DownloadPdfView.O
         title = "Выберите диск";
     }
 
-    public ChoosePdfDialog(List<ServerPSQL> serverPSQLList, String ip) {
+    public ChoosePdfDialog(List<ServerPsql> serverPsqlList, String ip) {
         this.ip = ip;
         monitor = "psql";
         parameter = "&c_db=";
-        size = serverPSQLList.size();
+        size = serverPsqlList.size();
         names = new String[size];
         for (int i = 0; i < size; i++) {
-            names [i] = serverPSQLList.get(i).c_datname;
+            names [i] = serverPsqlList.get(i).c_datname;
         }
         title = "Выберите базу данных";
     }

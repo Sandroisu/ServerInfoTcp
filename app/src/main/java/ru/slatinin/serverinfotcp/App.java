@@ -14,17 +14,17 @@ import java.util.ArrayList;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.ServerArgs;
-import ru.slatinin.serverinfotcp.server.SingleInfo;
+import ru.slatinin.serverinfotcp.server.SingleServer;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.sevice.TcpService;
 import ru.slatinin.serverinfotcp.ui.OnTcpInfoReceived;
 
-import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET_LOG;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.DF;
+import static ru.slatinin.serverinfotcp.server.SingleServer.IOTOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.NET;
+import static ru.slatinin.serverinfotcp.server.SingleServer.NET_LOG;
+import static ru.slatinin.serverinfotcp.server.SingleServer.PSQL;
+import static ru.slatinin.serverinfotcp.server.SingleServer.TOP;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.ADDRESS;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.BASE_URL;
 import static ru.slatinin.serverinfotcp.ui.MainActivity.PORT;
@@ -34,7 +34,6 @@ import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 public class App extends Application implements CallSqlQueryListener {
     private final String ARGS = "args";
 
-    private ServerArgs serverArgs;
     private InfoHolder infoHolder;
     private TcpClient tcpClient;
     private ArrayList<OnTcpInfoReceived> listenersList;
@@ -60,6 +59,8 @@ public class App extends Application implements CallSqlQueryListener {
     }
 
     public void connect(String address, String port) {
+
+        Thread thread = new Thread(() -> {
         if (tcpClient != null) {
             tcpClient.stopClient();
             infoHolder.clear();
@@ -68,29 +69,28 @@ public class App extends Application implements CallSqlQueryListener {
                 listener.createTcpInfo(infoHolder);
             }
         }
-        Thread thread = new Thread(() -> {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
                     if (ARGS.equals(dataInfo)) {
-                        serverArgs = new ServerArgs(objects[0]);
+                        ServerArgs serverArgs = new ServerArgs(objects[0]);
                         saveRepo(serverArgs.repos);
                         return;
                     }
                     int position = -1;
                     if (DF.equals(dataInfo) || IOTOP.equals(dataInfo) || PSQL.equals(dataInfo)) {
-                        SingleInfo info = new SingleInfo(ip, dataInfo);
+                        SingleServer info = new SingleServer(ip, dataInfo);
                         info.init(dataInfo, objects);
                         position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
 
                     } else {
                         if (objects.length > 1) {
-                            SingleInfo info = new SingleInfo(ip, dataInfo);
+                            SingleServer info = new SingleServer(ip, dataInfo);
                             info.init(dataInfo, objects);
                             position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
                         } else {
                             for (JsonObject object : objects) {
-                                SingleInfo info = new SingleInfo(ip, dataInfo);
+                                SingleServer info = new SingleServer(ip, dataInfo);
                                 info.init(dataInfo, object);
                                 position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
                             }
@@ -98,7 +98,7 @@ public class App extends Application implements CallSqlQueryListener {
                     }
                     if (position >= 0) {
                         for (OnTcpInfoReceived listener : listenersList) {
-                            listener.updateTcpInfo(infoHolder.getSingleInfoList().get(position), dataInfo, position);
+                            listener.updateTcpInfo(infoHolder.getSingleServerList().get(position), dataInfo, position);
                         }
                     }
                 }
@@ -158,42 +158,45 @@ public class App extends Application implements CallSqlQueryListener {
         listenersList.remove(listener);
     }
 
-    public ServerArgs getServerArgs() {
-        return serverArgs;
-    }
-
     @Override
     public void onMustCallOldData(String dataInfo, String ip) {
-        String databaseName = "";
-        String limit = "";
-        switch (dataInfo) {
-            case TOP:
-                databaseName = "dbo.cd_top";
-                limit = "50";
-                break;
-            case NET_LOG:
-                databaseName = "dbo.cd_net_log";
-                limit = "50";
-                break;
-            case NET:
-                databaseName = "dbo.cd_net";
-                limit = "50";
-                break;
-            case PSQL:
-                databaseName = "dbo.cd_psql";
-                limit = "7";
-                break;
-            default:
-                break;
-        }
-        if (databaseName.isEmpty()) {
-            return;
-        }
-        if (tcpClient != null) {
-            String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
-                    + " where c_ip = '" + ip + "' order by id desc limit " + limit;
-            tcpClient.sendMessage(query);
-        }
+        Thread thread = new Thread(() -> {
+            String databaseName = "";
+            String limit = "";
+            switch (dataInfo) {
+                case TOP:
+                    databaseName = "dbo.cd_top";
+                    limit = "50";
+                    break;
+                case NET_LOG:
+                    databaseName = "dbo.cd_net_log";
+                    limit = "50";
+                    break;
+                case NET:
+                    databaseName = "dbo.cd_net";
+                    limit = "50";
+                    break;
+                case PSQL:
+                    databaseName = "dbo.cd_psql";
+                    limit = "40";
+                    break;
+                case IOTOP:
+                    databaseName = "dbo.cd_iotop";
+                    limit = "5";
+                    break;
+                default:
+                    break;
+            }
+            if (databaseName.isEmpty()) {
+                return;
+            }
+            if (tcpClient != null) {
+                String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
+                        + " where c_ip = '" + ip + "' order by id desc limit " + limit;
+                tcpClient.sendMessage(query);
+            }
+        });
+       thread.start();
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,7 +17,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +27,18 @@ import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
-import ru.slatinin.serverinfotcp.server.ServerPSQL;
-import ru.slatinin.serverinfotcp.server.SingleInfo;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
+import ru.slatinin.serverinfotcp.server.SingleServer;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 
-import static ru.slatinin.serverinfotcp.server.SingleInfo.DF;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.IOTOP;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET_LOG;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.DF;
+import static ru.slatinin.serverinfotcp.server.SingleServer.IOTOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.NET;
+import static ru.slatinin.serverinfotcp.server.SingleServer.NET_LOG;
+import static ru.slatinin.serverinfotcp.server.SingleServer.PSQL;
+import static ru.slatinin.serverinfotcp.server.SingleServer.TOP;
 
 
 public class DetailedActivity extends AppCompatActivity implements OnTcpInfoReceived, ViewTreeObserver.OnGlobalLayoutListener, OnConnectAttempt {
@@ -62,6 +62,8 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
     private TextView tvError;
     private Button btnReconnect;
+    private Button btnShowProcesses;
+    private TableLayout tlProcesses;
 
     private ConstraintLayout clPsql;
     private ConstraintLayout clDf;
@@ -114,6 +116,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ivIoTopPdf = findViewById(R.id.da_iotop_pdf);
         ivNetLogPdf = findViewById(R.id.da_net_log_pdf);
         ivPsqlPdf = findViewById(R.id.da_psql_pdf);
+        tlProcesses = findViewById(R.id.da_processes);
 
         bcTopMem.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
@@ -135,14 +138,25 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
             ServerInfoDialog reconnectServerInfoDialog = new ServerInfoDialog(this);
             reconnectServerInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         });
+
+        btnShowProcesses = findViewById(R.id.da_show_processes);
+
+        btnShowProcesses.setOnClickListener(v -> {
+            if (tlProcesses.getVisibility() == View.GONE) {
+                tlProcesses.setVisibility(View.VISIBLE);
+            }else {
+                tlProcesses.setVisibility(View.GONE);
+            }
+        });
+
         ivCpuPdf.setUrl(UrlUtil.getUrl(ip, "cpu", this), ip + "cpu.pdf");
         ivMemPdf.setUrl(UrlUtil.getUrl(ip, TOP, this), ip + TOP + ".pdf");
         ivNetPdf.setUrl(UrlUtil.getUrl(ip, NET, this), ip + NET + ".pdf");
         ivNetLogPdf.setUrl(UrlUtil.getUrl(ip, NET_LOG, this), ip + NET_LOG + ".pdf");
 
-        for (int i = 0; i < app.getInfoHolder().getSingleInfoList().size(); i++) {
-            if (app.getInfoHolder().getSingleInfoList().get(i).ip.equals(ip)) {
-                SingleInfo info = app.getInfoHolder().getSingleInfoList().get(i);
+        for (int i = 0; i < app.getInfoHolder().getSingleServerList().size(); i++) {
+            if (app.getInfoHolder().getSingleServerList().get(i).ip.equals(ip)) {
+                SingleServer info = app.getInfoHolder().getSingleServerList().get(i);
                 ChartUtil.updateNetList(info.getServerNETList(), lcNet);
                 updateDiskInfo(info.getServerDFList());
                 updateTop(info.getServerTOP());
@@ -157,7 +171,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     @Override
-    public void updateTcpInfo(SingleInfo info, String dataInfo, int position) {
+    public void updateTcpInfo(SingleServer info, String dataInfo, int position) {
         runOnUiThread(() -> {
             if (!info.ip.equals(ip)) {
                 return;
@@ -211,6 +225,8 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         ChartUtil.updateTopBars(serverTOP.serverCPU, bcTopCpu, false);
         ChartUtil.updateServerTasksBars(serverTOP.serverTasks, pcTopTasks);
         ChartUtil.updateServerCommonText(serverTOP.serverCommon, tvTopCommon);
+        ChartUtil.buildProcessesTable(serverTOP.serverProcesses, tlProcesses, DetailedActivity.this);
+
     }
 
     private void updateDiskInfo(ServerDFList serverDFList) {
@@ -227,7 +243,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         });
     }
 
-    private void updatePsql(List<List<ServerPSQL>> serverPSQLS) {
+    private void updatePsql(List<List<ServerPsql>> serverPSQLS) {
         if (serverPSQLS == null || serverPSQLS.size() == 0 || serverPSQLS.get(0).size() == 0) {
             return;
         }

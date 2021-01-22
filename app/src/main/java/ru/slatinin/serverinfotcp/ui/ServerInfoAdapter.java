@@ -2,14 +2,11 @@ package ru.slatinin.serverinfotcp.ui;
 
 import android.content.Context;
 import android.os.Handler;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,27 +16,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Legend;
 
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
+import ru.slatinin.serverinfotcp.TimeUtil;
 import ru.slatinin.serverinfotcp.UrlUtil;
-import ru.slatinin.serverinfotcp.server.SingleInfo;
-import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
-import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
+import ru.slatinin.serverinfotcp.server.SingleServer;
 
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.NET;
+import static ru.slatinin.serverinfotcp.server.SingleServer.TOP;
 
 public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.ServerInfoHolder> {
-    private final List<SingleInfo> singleInfoList;
+    private final List<SingleServer> singleServerList;
     protected OnServerInfoHolderClickListener onServerInfoHolderClickListener;
 
-    public ServerInfoAdapter(List<SingleInfo> list, OnServerInfoHolderClickListener listener) {
+    public ServerInfoAdapter(List<SingleServer> list, OnServerInfoHolderClickListener listener) {
         onServerInfoHolderClickListener = listener;
-        singleInfoList = list;
+        singleServerList = list;
     }
 
     @NonNull
@@ -52,11 +47,11 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
 
     @Override
     public void onBindViewHolder(@NonNull ServerInfoHolder holder, int position) {
-        holder.bind(singleInfoList.get(position));
+        holder.bind(singleServerList.get(position));
     }
 
-    public List<SingleInfo> getSingleInfoList() {
-        return singleInfoList;
+    public List<SingleServer> getSingleServerList() {
+        return singleServerList;
     }
 
     @Override
@@ -71,7 +66,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
 
     @Override
     public int getItemCount() {
-        return singleInfoList.size();
+        return singleServerList.size();
     }
 
     protected static class ServerInfoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -110,9 +105,8 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
             tvIp.setOnClickListener(this);
         }
 
-        protected void bind(SingleInfo info) {
-            ChartUtil.buildTable(info.getServerIoTopList(), clIoTop, tlIotop, mContext);
-            tvTime.setText(ChartUtil.formatMillis(info.time));
+        protected void bind(SingleServer info) {
+            tvTime.setText(TimeUtil.formatMillisToHours(info.time));
             ivSignal.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_server_ok_signal_24));
             Handler handler = new Handler();
             handler.postDelayed(() -> listener.onRedSignal(ivSignal), 1000);
@@ -135,6 +129,9 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
                     ChartUtil.updateCpuList(info.getServerCommonList(), lcCPU);
                     break;
             }
+            if (info.getServerIoTopList()!= null && info.getServerIoTopList().serverIoTopList.size() > 0) {
+                ChartUtil.buildTable(info.getServerIoTopList(), clIoTop, tlIotop, mContext);
+            }
         }
 
         @Override
@@ -145,16 +142,6 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         }
 
     }
-
-    private static boolean isNumeric(String str) {
-        try {
-            Double.parseDouble(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
 
     public interface OnServerInfoHolderClickListener {
         void onClicked(String ip);

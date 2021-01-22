@@ -179,7 +179,7 @@
                 android:layout_height="wrap_content"
                 android:rotation="-90"
                 android:text="@string/level"
-                app:layout_constraintBottom_toBottomOf="@id/da_cpu_load"
+                app:layout_constraintBottom_toBottomOf="@id/da_rl_cpu_load"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/da_top_common" />
 
@@ -224,11 +224,7 @@
                     android:textSize="10sp"
                     tools:ignore="SmallSp" />
 
-                <TableLayout
-                    android:id="@+id/da_processes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/da_cpu_load" />
+
             </RelativeLayout>
 
             <TextView
@@ -241,6 +237,16 @@
                 app:layout_constraintBottom_toBottomOf="@id/da_rl_cpu_load"
                 app:layout_constraintEnd_toEndOf="parent" />
 
+            <TableLayout
+                android:id="@+id/da_processes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/da_rl_cpu_load" />
+
             <RelativeLayout
                 android:id="@+id/da_rl_top_mem"
                 android:layout_width="0dp"
@@ -248,7 +254,7 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="@id/da_top_guideline_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/da_rl_cpu_load">
+                app:layout_constraintTop_toBottomOf="@id/da_processes">
 
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/da_top_mem"
@@ -274,7 +280,7 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/da_top_guideline_vertical"
-                app:layout_constraintTop_toBottomOf="@id/da_rl_cpu_load" />
+                app:layout_constraintTop_toBottomOf="@id/da_processes" />
 
             <com.github.mikephil.charting.charts.PieChart
                 android:id="@+id/da_top_tasks"

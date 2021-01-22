@@ -2,6 +2,8 @@ package ru.slatinin.serverinfotcp.server;
 
 import com.google.gson.JsonObject;
 
+import ru.slatinin.serverinfotcp.TimeUtil;
+
 public class ServerNetLog extends BaseServerInfo {
 
     public static final String C_NAME = "c_name";
@@ -11,6 +13,7 @@ public class ServerNetLog extends BaseServerInfo {
     public static final String C_RECEIVED_NAME = "c_received_name";
     public static final String N_RATE = "n_rate";
     public static final String C_RATE_NAME = "c_rate_name";
+    private final String DX_CREATED = "dx_created";
 
     public final String c_name;
     public final String c_sent_name;
@@ -19,6 +22,7 @@ public class ServerNetLog extends BaseServerInfo {
     public final float n_sent;
     public final float n_received;
     public final float n_rate;
+    public final String time;
 
     public ServerNetLog(JsonObject object) {
         super(object);
@@ -29,6 +33,11 @@ public class ServerNetLog extends BaseServerInfo {
         n_sent = JsonUtil.getFloat(object, N_SENT);
         n_received = JsonUtil.getFloat(object, N_RECEIVED);
         n_rate = JsonUtil.getFloat(object, N_RATE);
+        if (object.has(DX_CREATED)) {
+            time = TimeUtil.formatTimeToMinutes(JsonUtil.getString(object, DX_CREATED));
+        } else {
+            time = TimeUtil.formatMillisToMinutes(System.currentTimeMillis());
+        }
     }
 
 }

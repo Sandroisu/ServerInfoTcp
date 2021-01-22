@@ -1,6 +1,5 @@
 package ru.slatinin.serverinfotcp.ui;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -36,23 +35,21 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.server.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.ServerNET;
-import ru.slatinin.serverinfotcp.server.ServerPSQL;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.serverdf.SingleServerDF;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
 import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
 import ru.slatinin.serverinfotcp.server.servertop.BaseTopInfo;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCpu;
+import ru.slatinin.serverinfotcp.server.servertop.ServerProcesses;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTasks;
 
 import static ru.slatinin.serverinfotcp.server.ServerNET.N_RECEIVED;
@@ -86,7 +83,7 @@ public class ChartUtil {
         legend.setTextSize(11f);
         legend.setXEntrySpace(4f);
         barChart.getDescription().setEnabled(descriptionEnable);
-        barChart.animateXY(1500, 1500);
+        barChart.animateXY(500, 1500);
     }
 
     public static void initPieChart(PieChart pieChart) {
@@ -108,13 +105,13 @@ public class ChartUtil {
     public static void initLineChart(LineChart lineChart, boolean nullDescription) {
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.enableGridDashedLine(10f, 10f, 0f);
+        //xAxis.enableGridDashedLine(10f, 10f, 0f);
         xAxis.setAxisMinimum(0f);
 
         YAxis leftAxis = lineChart.getAxisLeft();
         leftAxis.removeAllLimitLines();
         leftAxis.setAxisMinimum(0f);
-        leftAxis.enableGridDashedLine(10f, 10f, 0f);
+        //leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawZeroLine(false);
         leftAxis.setEnabled(true);
 
@@ -153,9 +150,11 @@ public class ChartUtil {
         }
         ArrayList<Entry> newSentValues = new ArrayList<>();
         ArrayList<Entry> newReceivedValues = new ArrayList<>();
+        String[] labels = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
             newSentValues.add(new Entry(i, list.get(i).n_sent));
             newReceivedValues.add(new Entry(i, list.get(i).n_received));
+            labels[i] = list.get(i).time;
         }
         LineDataSet sentSet;
         LineDataSet receivedSet;
@@ -165,6 +164,7 @@ public class ChartUtil {
         dataSets.add(createLineChartSet(sentSet, Color.parseColor("#00c853"), true, 1f, true));
         dataSets.add(createLineChartSet(receivedSet, Color.parseColor("#dd2c00"), true, 1f, true));
         LineData data = new LineData(dataSets);
+        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         chart.setData(data);
         chart.invalidate();
     }
@@ -172,9 +172,11 @@ public class ChartUtil {
     public static void updateNetLogList(List<ServerNetLog> serverNetLogList, LineChart lineChart) {
         ArrayList<Entry> newSentValues = new ArrayList<>();
         ArrayList<Entry> newReceivedValues = new ArrayList<>();
+        String[] labels = new String[serverNetLogList.size()];
         for (int i = 0; i < serverNetLogList.size(); i++) {
             newSentValues.add(new Entry(i, serverNetLogList.get(i).n_sent));
             newReceivedValues.add(new Entry(i, serverNetLogList.get(i).n_received));
+            labels[i] = serverNetLogList.get(i).time;
         }
         LineDataSet sentSet;
         LineDataSet receivedSet;
@@ -184,6 +186,7 @@ public class ChartUtil {
         dataSets.add(createLineChartSet(sentSet, Color.parseColor("#18ffff"), false, 2f, false));
         dataSets.add(createLineChartSet(receivedSet, Color.parseColor("#33691e"), false, 2f, false));
         LineData data = new LineData(dataSets);
+        lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         lineChart.setData(data);
         lineChart.invalidate();
     }
@@ -195,10 +198,12 @@ public class ChartUtil {
         ArrayList<Entry> first = new ArrayList<>();
         ArrayList<Entry> second = new ArrayList<>();
         ArrayList<Entry> third = new ArrayList<>();
+        String[] labels = new String[serverCommonList.size()];
         for (int i = 0; i < serverCommonList.size(); i++) {
             first.add(new Entry(i, serverCommonList.get(i).load_average[0]));
             second.add(new Entry(i, serverCommonList.get(i).load_average[1]));
             third.add(new Entry(i, serverCommonList.get(i).load_average[2]));
+            labels[i] = serverCommonList.get(i).time;
         }
         LineDataSet firstSet;
         LineDataSet secondSet;
@@ -213,19 +218,24 @@ public class ChartUtil {
             dataSets.add(createLineChartSet(secondSet, Color.parseColor("#dd2c00"), false, 1f, true));
             dataSets.add(createLineChartSet(thirdSet, Color.parseColor("#0091ea"), false, 1f, true));
             LineData data = new LineData(dataSets);
+            lcNetInfo.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
             lcNetInfo.setData(data);
             lcNetInfo.invalidate();
         }
     }
 
-    public static void updatePsqlList(List<List<ServerPSQL>> serverPsqlLists, LineChart chart, boolean xActCommits) {
+    public static void updatePsqlList(List<List<ServerPsql>> serverPsqlLists, LineChart chart, boolean xActCommits) {
         int[] colors = getBarChartColors(serverPsqlLists.get(0).size());
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        String[] labels = new String[serverPsqlLists.size()];
         for (int j = 0; j < serverPsqlLists.get(0).size(); j++) {
             ArrayList<Entry> entries = new ArrayList<>();
             for (int k = 0; k < serverPsqlLists.size(); k++) {
                 if (xActCommits) {
-                    entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_xact_commit));
+                    labels[k] = serverPsqlLists.get(k).get(0).time;
+                    if (k > 0) {
+                        entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_xact_commit_calculated));
+                    }
                 } else {
                     entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_numbackends));
                 }
@@ -234,11 +244,9 @@ public class ChartUtil {
             dataSets.add(set);
         }
         LineData data = new LineData(dataSets);
-        if (xActCommits){
-            setMillionsAxisFormatter(chart.getAxisLeft());
-        }
-        chart.setData(data);
+        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         chart.getLegend().setWordWrapEnabled(true);
+        chart.setData(data);
         chart.invalidate();
     }
 
@@ -460,7 +468,6 @@ public class ChartUtil {
                 return y + mK;
             }
         });
-
     }
 
     private static void setGbMemoryAxisFormatter(YAxis yAxis) {
@@ -497,20 +504,11 @@ public class ChartUtil {
         });
     }
 
-    public static String formatMillis(long millis) {
-        @SuppressLint("SimpleDateFormat")
-        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-        Date date = new Date(millis);
-        return formatter.format(date);
-    }
-
     public static void buildTable(ServerIoTopList serverIoTopList, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
-        if (serverIoTopList == null || serverIoTopList.serverIoTopList.size() == 0) {
-            return;
-        }
-        if (clIoTop.getVisibility() == View.GONE) {
+        if (clIoTop != null && clIoTop.getVisibility() == View.GONE) {
             clIoTop.setVisibility(View.VISIBLE);
         }
+        List<SingleIoTop> singleIoTopList = serverIoTopList.serverIoTopList;
         tlIotop.removeAllViews();
         TableRow namesRow = new TableRow(mContext);
         for (int i = 0; i < ServerIoTopList.columnNames.length; i++) {
@@ -530,10 +528,10 @@ public class ChartUtil {
             namesRow.addView(name);
         }
         tlIotop.addView(namesRow);
-        List<SingleIoTop> singleIoTopList = serverIoTopList.serverIoTopList;
+
         for (int i = 0; i < singleIoTopList.size(); i++) {
             if (singleIoTopList.get(i).isMoreThenOne) {
-                List<String> values = singleIoTopList.get(i).serverIoTopMapList;
+                List<String> values = singleIoTopList.get(i).serverIoTopStringValues;
                 TableRow valueRow = new TableRow(mContext);
                 for (int j = 0; j < values.size(); j++) {
                     TableRow.LayoutParams params = new TableRow.LayoutParams(
@@ -553,6 +551,56 @@ public class ChartUtil {
                     valueRow.addView(value);
                 }
                 tlIotop.addView(valueRow);
+            }
+        }
+    }
+
+    public static void buildProcessesTable(List<ServerProcesses> serverProcessesList, TableLayout tlProcesses, Context mContext) {
+        if (serverProcessesList == null || serverProcessesList.size() == 0) {
+            return;
+        }
+        tlProcesses.removeAllViews();
+        TableRow namesRow = new TableRow(mContext);
+        for (int i = 0; i < ServerProcesses.getNames().length; i++) {
+            TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, 0, 10, 0);
+            if (i == 0 || i == 2 || i == 3) {
+                layoutParams.gravity = Gravity.END;
+            }
+            TextView name = new TextView(mContext);
+            name.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+            String text = ServerProcesses.getNames()[i] + " ";
+            name.setText(text);
+            name.setLayoutParams(layoutParams);
+            name.setPadding(0, 0, 1, 0);
+            name.setTextSize(12);
+            namesRow.addView(name);
+        }
+        tlProcesses.addView(namesRow);
+
+        for (int i = 0; i < serverProcessesList.size(); i++) {
+            if (serverProcessesList.get(i).isNotZero) {
+                List<String> values = serverProcessesList.get(i).serverProcessesStringValues;
+                TableRow valueRow = new TableRow(mContext);
+                for (int j = 0; j < values.size(); j++) {
+                    TableRow.LayoutParams params = new TableRow.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+                    params.setMargins(0, 1, 10, 0);
+                    TextView value = new TextView(mContext);
+                    if (j == 0 || j == 2 || j == 3) {
+                        params.gravity = Gravity.END;
+                    }
+                    value.setLayoutParams(params);
+                    value.setPadding(0, 0, 1, 0);
+                    value.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
+                    String text = values.get(j) + " ";
+                    value.setText(text);
+                    value.setTextSize(12);
+                    valueRow.addView(value);
+                }
+                tlProcesses.addView(valueRow);
             }
         }
     }

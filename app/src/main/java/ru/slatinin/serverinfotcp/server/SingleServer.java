@@ -9,10 +9,11 @@ import java.util.List;
 
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 
-public class SingleInfo {
+public class SingleServer {
 
     public static final String NET = "net";
     public static final String NET_LOG = "net-log";
@@ -31,12 +32,16 @@ public class SingleInfo {
     private ServerDFList serverDFList;
     private ServerIoTopList serverIoTopList;
     private ServerTOP serverTOP;
-    private List<ServerPSQL> tempPSQLList;
-    private final List<List<ServerPSQL>> serverPsqlLists;
+    private ServerPsql[] tempPsqlArray;
+    private final List<List<ServerPsql>> serverPsqlLists;
     private final List<ServerCommon> serverCommonList;
     private final List<String> dataInfoList;
 
-    public SingleInfo(String ip, String dataInfo) {
+    private boolean firstPsql = true;
+    public boolean firstCall = true;
+    private int psqlCapacity;
+
+    public SingleServer(String ip, String dataInfo) {
         this.ip = ip;
         this.dataInfo = dataInfo;
         this.time = System.currentTimeMillis();
@@ -51,7 +56,7 @@ public class SingleInfo {
         dataInfoList.add(PSQL);
     }
 
-    public void updateServerInfo(SingleInfo info, String dataInfo) {
+    public void updateServerInfo(SingleServer info, String dataInfo) {
         this.dataInfo = dataInfo;
         this.time = info.time;
         switch (dataInfo) {
@@ -70,7 +75,6 @@ public class SingleInfo {
                 }
                 break;
             case TOP:
-                serverTOP = info.serverTOP;
                 if (info.serverCommonList.size() > 0 && serverCommonList.size() < 10) {
                     List<ServerCommon> temp = info.serverCommonList;
                     Collections.reverse(temp);
@@ -81,6 +85,7 @@ public class SingleInfo {
                     if (serverCommonList.size() > 59) {
                         serverCommonList.remove(0);
                     }
+                    serverTOP = info.serverTOP;
                     serverCommonList.add(info.serverTOP.serverCommon);
                 }
                 break;
@@ -88,20 +93,52 @@ public class SingleInfo {
                 serverDFList = info.serverDFList;
                 break;
             case PSQL:
-                if (serverPsqlLists.size() > 9) {
-                    serverPsqlLists.remove(0);
+                if (firstPsql) {
+                    psqlCapacity = info.getTempPsqlArray().length;
+                    firstPsql = false;
                 }
-                serverPsqlLists.add(info.getTempPSQLList());
+                if (info.getTempPsqlArray().length > psqlCapacity && serverPsqlLists.size() < 3 && info.getTempPsqlArray().length / psqlCapacity < 10) {
+                    ServerPsql[] list = info.getTempPsqlArray();
+                    List<List<ServerPsql>> temp = new ArrayList<>(serverPsqlLists);
+                    serverPsqlLists.clear();
+                    for (int i = 0; i < list.length; i += psqlCapacity) {
+                        if (i + psqlCapacity < list.length) {
+                            ServerPsql[] toBeAdded = Arrays.copyOfRange(list, i, i + psqlCapacity);
+                            ArrayList<ServerPsql> toBeAddedList = new ArrayList<>(Arrays.asList(toBeAdded));
+                            Collections.reverse(toBeAddedList);
+                            serverPsqlLists.add(toBeAddedList);
+                        }
+                    }
+                    serverPsqlLists.addAll(temp);
+                } else {
+                    if (serverPsqlLists.size() > 9) {
+                        serverPsqlLists.remove(0);
+                    }
+                    serverPsqlLists.add(Arrays.asList(info.getTempPsqlArray()));
+                }
+                if (serverPsqlLists.size() > 0)
+                    for (int i = 0; i < serverPsqlLists.get(0).size(); i++) {
+                        for (int j = 0; j < serverPsqlLists.size()-1; j++) {
+                            serverPsqlLists.get(j + 1).get(i).calculateXactCommit(serverPsqlLists.get(j).get(i).n_xact_commit);
+                        }
+                    }
                 break;
             case IOTOP:
                 serverIoTopList = info.serverIoTopList;
                 break;
             case NET_LOG:
-                lastServerNetLog = info.lastServerNetLog;
-                if (serverNetLogList.size() > 59) {
-                    serverNetLogList.remove(0);
+                if (info.serverNetLogList.size() > 0 && serverNetLogList.size() < 10) {
+                    List<ServerNetLog> temp = info.serverNetLogList;
+                    temp.addAll(serverNetLogList);
+                    serverNetLogList.clear();
+                    serverNetLogList.addAll(temp);
+                } else {
+                    lastServerNetLog = info.lastServerNetLog;
+                    if (serverNetLogList.size() > 59) {
+                        serverNetLogList.remove(0);
+                    }
+                    serverNetLogList.add(info.lastServerNetLog);
                 }
-                serverNetLogList.add(info.lastServerNetLog);
                 break;
         }
     }
@@ -131,15 +168,22 @@ public class SingleInfo {
                 serverDFList = new ServerDFList(object);
                 break;
             case PSQL:
-                tempPSQLList = new ArrayList<>();
-                for (JsonObject obj : object) {
-                    tempPSQLList.add(new ServerPSQL(obj));
+                tempPsqlArray = new ServerPsql[object.length];
+                for (int i = 0; i < object.length; i++) {
+                    tempPsqlArray[i] = (new ServerPsql(object[i]));
                 }
                 break;
             case IOTOP:
                 serverIoTopList = new ServerIoTopList(object);
                 break;
             case NET_LOG:
+                if (object.length > 1) {
+                    for (JsonObject netObject : object) {
+                        ServerNetLog sNet = new ServerNetLog(netObject);
+                        serverNetLogList.add(sNet);
+                        Collections.reverse(serverNetLogList);
+                    }
+                }
                 lastServerNetLog = new ServerNetLog(object[0]);
                 break;
         }
@@ -169,11 +213,11 @@ public class SingleInfo {
         return serverIoTopList;
     }
 
-    public List<ServerPSQL> getTempPSQLList() {
-        return tempPSQLList;
+    public ServerPsql[] getTempPsqlArray() {
+        return tempPsqlArray;
     }
 
-    public List<List<ServerPSQL>> getServerPsqlLists() {
+    public List<List<ServerPsql>> getServerPsqlLists() {
         return serverPsqlLists;
     }
 

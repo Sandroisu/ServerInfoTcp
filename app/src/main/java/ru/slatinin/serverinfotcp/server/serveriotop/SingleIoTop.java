@@ -25,35 +25,35 @@ public class SingleIoTop extends BaseServerInfo {
     public final float n_kb_wrtn_s;
     public final long n_kb_read;
     public final long n_kb_wrtn;
-    public final List<String> serverIoTopMapList;
+    public final List<String> serverIoTopStringValues;
     public boolean isMoreThenOne = false;
 
     public SingleIoTop(JsonObject object) {
         super(object);
-        serverIoTopMapList = new ArrayList<>();
+        serverIoTopStringValues = new ArrayList<>();
         c_device = JsonUtil.getString(object, C_DEVICE);
-        serverIoTopMapList.add(c_device);
+        serverIoTopStringValues.add(c_device);
 
         n_tps = JsonUtil.getFloat(object, N_TPS);
-        serverIoTopMapList.add(String.valueOf(n_tps));
+        serverIoTopStringValues.add(String.valueOf(n_tps));
 
         n_kb_read_s = JsonUtil.getFloat(object, N_KB_READ_S);
-        serverIoTopMapList.add(String.valueOf(n_kb_read_s));
+        serverIoTopStringValues.add(String.valueOf(n_kb_read_s));
 
         n_kb_wrtn_s = JsonUtil.getFloat(object, N_KB_WRTN_S);
-        serverIoTopMapList.add(String.valueOf(n_kb_wrtn_s));
+        serverIoTopStringValues.add(String.valueOf(n_kb_wrtn_s));
 
         n_kb_read = JsonUtil.getLong(object, N_KB_READ);
         double read = (double) n_kb_read / 1024 / 1024;
-        serverIoTopMapList.add(formatDouble(read));
+        serverIoTopStringValues.add(formatDouble(read));
 
         n_kb_wrtn = JsonUtil.getLong(object, N_KB_WRTN);
         double write = (double) n_kb_wrtn / 1024 / 1024;
-        serverIoTopMapList.add(formatDouble(write));
+        serverIoTopStringValues.add(formatDouble(write));
     }
 
-    protected List<String> getServerIoTopMapList() {
-        return serverIoTopMapList;
+    protected List<String> getServerIoTopStringValues() {
+        return serverIoTopStringValues;
 
     }
 

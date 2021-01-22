@@ -1,13 +1,20 @@
 package ru.slatinin.serverinfotcp.server.servertop;
 
+import android.annotation.SuppressLint;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import ru.slatinin.serverinfotcp.TimeUtil;
 import ru.slatinin.serverinfotcp.server.JsonUtil;
 
 public class ServerCommon extends BaseTopInfo {
@@ -20,6 +27,7 @@ public class ServerCommon extends BaseTopInfo {
     private final String N_LA1 = "n_la1";
     private final String N_LA2 = "n_la2";
     private final String N_LA3 = "n_la3";
+    private final String DX_CREATED = "dx_created";
 
     public String time;
     public String up_hours;
@@ -29,7 +37,6 @@ public class ServerCommon extends BaseTopInfo {
 
     public ServerCommon(JsonObject object) {
         super();
-        time = JsonUtil.getString(object, TIME);
         up_hours = JsonUtil.getString(object, UP_HOURS);
         up_days = JsonUtil.getString(object, UP_DAYS);
         user = JsonUtil.getString(object, USER);
@@ -47,8 +54,10 @@ public class ServerCommon extends BaseTopInfo {
                     e.printStackTrace();
                 }
             }
-        }else {
-            if (object.has(N_LA1)&&object.has(N_LA2)&&object.has(N_LA3)){}
+            time = TimeUtil.formatMillisToMinutes(System.currentTimeMillis());
+        } else {
+            String originalString = JsonUtil.getString(object, DX_CREATED);
+            time = TimeUtil.formatTimeToMinutes(originalString);
             load_average = new float[3];
             load_average[0] = JsonUtil.getFloat(object, N_LA1);
             load_average[1] = JsonUtil.getFloat(object, N_LA2);
@@ -98,4 +107,5 @@ public class ServerCommon extends BaseTopInfo {
     protected List<Field> initFields() {
         return new ArrayList<>(Arrays.asList(getClass().getFields()));
     }
+
 }

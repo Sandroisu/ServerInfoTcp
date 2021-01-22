@@ -1,66 +1,59 @@
 package ru.slatinin.serverinfotcp.server;
 
-import com.google.android.material.tabs.TabLayout;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.CallSqlQueryListener;
 
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.NET_LOG;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.PSQL;
-import static ru.slatinin.serverinfotcp.server.SingleInfo.TOP;
+import static ru.slatinin.serverinfotcp.server.SingleServer.IOTOP;
 
 public class InfoHolder {
     private final CallSqlQueryListener callSqlQueryListener;
-    private final ArrayList<SingleInfo> singleInfoList;
-    private final ArrayList<String> dataInfoList;
+    private final ArrayList<SingleServer> singleServerList;
 
     public InfoHolder(CallSqlQueryListener callSqlQueryListener) {
         this.callSqlQueryListener = callSqlQueryListener;
-        singleInfoList = new ArrayList<>();
-        dataInfoList = new ArrayList<>();
-        dataInfoList.add(TOP);
-        dataInfoList.add(NET);
-        dataInfoList.add(NET_LOG);
-        dataInfoList.add(PSQL);
+        singleServerList = new ArrayList<>();
     }
 
-    public int updateOrAddInfo(SingleInfo singleInfo, String dataInfo, String address, String port) {
+    public int updateOrAddInfo(SingleServer singleServer, String dataInfo, String address, String port) {
         boolean alreadyExists = false;
         int position = -1;
-        for (int i = 0; i < singleInfoList.size(); i++) {
-            if (singleInfoList.get(i).ip.equals(singleInfo.ip)) {
-                singleInfoList.get(i).updateServerInfo(singleInfo, dataInfo);
+        for (int i = 0; i < singleServerList.size(); i++) {
+            if (singleServerList.get(i).ip.equals(singleServer.ip)) {
+                singleServerList.get(i).updateServerInfo(singleServer, dataInfo);
+                if(singleServerList.get(i).firstCall){
+                    singleServerList.get(i).firstCall = false;
+                    callSqlQueryListener.onMustCallOldData(IOTOP, singleServer.ip);
+                }
                 alreadyExists = true;
                 position = i;
                 break;
             }
         }
-        if (!alreadyExists && singleInfoList.size() == 0) {
+        if (!alreadyExists && singleServerList.size() == 0) {
             callSqlQueryListener.onSaveAddressAndPort(address, port);
         }
 
-        if (!alreadyExists && singleInfo.hasValues()) {
-            singleInfoList.add(singleInfo);
-            position = singleInfoList.size() - 1;
+        if (!alreadyExists && singleServer.hasValues()) {
+            singleServerList.add(singleServer);
+            position = singleServerList.size() - 1;
         }
-        for (SingleInfo sInfo : singleInfoList) {
-            if (sInfo.ip.equals(singleInfo.ip)&&sInfo.needCall(dataInfo)){
-                callSqlQueryListener.onMustCallOldData(dataInfo, singleInfo.ip);
+        for (SingleServer sInfo : singleServerList) {
+            if (sInfo.ip.equals(singleServer.ip) && sInfo.needCall(dataInfo)) {
+                callSqlQueryListener.onMustCallOldData(dataInfo, singleServer.ip);
                 break;
             }
         }
         return position;
     }
 
-    public List<SingleInfo> getSingleInfoList() {
-        return singleInfoList;
+    public List<SingleServer> getSingleServerList() {
+        return singleServerList;
     }
 
     public void clear() {
-        singleInfoList.clear();
+        singleServerList.clear();
     }
 
 }

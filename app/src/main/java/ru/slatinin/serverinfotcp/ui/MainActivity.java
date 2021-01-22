@@ -7,27 +7,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
 import java.util.Objects;
 
 import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
-import ru.slatinin.serverinfotcp.server.SingleInfo;
+import ru.slatinin.serverinfotcp.server.SingleServer;
 
 public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived, ServerInfoAdapter.OnServerInfoHolderClickListener, OnConnectAttempt {
     public static final String SHARED_PREFS = "ru.slatinin.serverinfotcp.shared.prefs";
@@ -51,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         setContentView(R.layout.activity_main);
         recyclerView = findViewById(R.id.activity_main_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleInfoList(), this);
+        serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleServerList(), this);
         recyclerView.setAdapter(serverInfoAdapter);
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
         serverInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
@@ -66,14 +61,14 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     }
 
     @Override
-    public void updateTcpInfo(SingleInfo info, String dataInfo, int position) {
+    public void updateTcpInfo(SingleServer info, String dataInfo, int position) {
         runOnUiThread(() -> serverInfoAdapter.notifyDataSetChanged());
     }
 
     @Override
     public void createTcpInfo(InfoHolder infoHolder) {
         runOnUiThread(() -> {
-            serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleInfoList(), MainActivity.this);
+            serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleServerList(), MainActivity.this);
             recyclerView.setAdapter(serverInfoAdapter);
         });
 

@@ -3,28 +3,31 @@ package ru.slatinin.serverinfotcp.server.serverpsql;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.ServerPSQL;
-
 public class ServerPsqlList {
 
-    public final List<ServerPSQL> serverPsqlList;
+    public final List<ServerPsql> serverPsqlList;
     private final String datname;
 
-    public ServerPsqlList(ServerPSQL serverPSQL) {
+    public ServerPsqlList(ServerPsql serverPSQL) {
         serverPsqlList = new ArrayList<>();
-        serverPsqlList.add(serverPSQL);
         datname = serverPSQL.c_datname;
+        serverPsqlList.add(serverPSQL);
     }
 
-    public void addServerPsql(List<ServerPSQL>  list) {
+    public void addServerPsql(List<ServerPsql>  list) {
         if (serverPsqlList.size()>9){
             removeFirst();
         }
-        for (ServerPSQL serverPSQL:list) {
+        for (ServerPsql serverPSQL:list) {
             if (serverPSQL.c_datname.equals(datname)){
                 serverPsqlList.add(serverPSQL);
-                break;
             }
+        }
+    }
+
+    public void addIfMatch(ServerPsql serverPsql){
+        if (datname.equals(serverPsql.c_datname)){
+            serverPsqlList.add(serverPsql);
         }
     }
     private void removeFirst(){
