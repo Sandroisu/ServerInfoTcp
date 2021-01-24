@@ -26,11 +26,12 @@ import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
-import ru.slatinin.serverinfotcp.server.ServerNetLog;
+import ru.slatinin.serverinfotcp.server.servernetlog.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.SingleServer;
-import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
-import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
+import ru.slatinin.serverinfotcp.server.serverdf.ServerDFObjectKeeper;
+import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopObjectKeeper;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsqlObjectListKeeper;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 
 import static ru.slatinin.serverinfotcp.server.SingleServer.DF;
@@ -157,13 +158,13 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         for (int i = 0; i < app.getInfoHolder().getSingleServerList().size(); i++) {
             if (app.getInfoHolder().getSingleServerList().get(i).ip.equals(ip)) {
                 SingleServer info = app.getInfoHolder().getSingleServerList().get(i);
-                ChartUtil.updateNetList(info.getServerNETList(), lcNet);
-                updateDiskInfo(info.getServerDFList());
-                updateTop(info.getServerTOP());
-                ChartUtil.updateCpuList(info.getServerCommonList(), lcCpuInfo);
-                updatePsql(info.getServerPsqlLists());
-                updateIoTop(info.getServerIoTopList());
-                updateNetLog(info.getServerNetLogList());
+                ChartUtil.updateNetList(info.serverNetObjectKeeper.serverNetList, lcNet);
+                updateDiskInfo(info.serverDFObjectKeeper);
+                updateTop(info.serverTOP);
+                ChartUtil.updateCpuList(info.serverTOP.serverCommonList, lcCpuInfo);
+                updatePsql(info.serverPsqlObjectListKeeper);
+                updateIoTop(info.serverIoTopObjectKeeper);
+                updateNetLog(info.serverNetLogObjectKeeper.serverNetLogList);
                 break;
             }
         }
@@ -171,30 +172,30 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     @Override
-    public void updateTcpInfo(SingleServer info, String dataInfo, int position) {
+    public void updateTcpInfo(SingleServer info) {
         runOnUiThread(() -> {
             if (!info.ip.equals(ip)) {
                 return;
             }
-            switch (dataInfo) {
+            switch (info.dataInfo) {
                 case NET:
-                    ChartUtil.updateNetList(info.getServerNETList(), lcNet);
+                    ChartUtil.updateNetList(info.serverNetObjectKeeper.serverNetList, lcNet);
                     break;
                 case DF:
-                    updateDiskInfo(info.getServerDFList());
+                    updateDiskInfo(info.serverDFObjectKeeper);
                     break;
                 case TOP:
-                    updateTop(info.getServerTOP());
-                    ChartUtil.updateCpuList(info.getServerCommonList(), lcCpuInfo);
+                    updateTop(info.serverTOP);
+                    ChartUtil.updateCpuList(info.serverTOP.serverCommonList, lcCpuInfo);
                     break;
                 case PSQL:
-                    updatePsql(info.getServerPsqlLists());
+                    updatePsql(info.serverPsqlObjectListKeeper);
                     break;
                 case IOTOP:
-                    updateIoTop(info.getServerIoTopList());
+                    updateIoTop(info.serverIoTopObjectKeeper);
                     break;
                 case NET_LOG:
-                    updateNetLog(info.getServerNetLogList());
+                    updateNetLog(info.serverNetLogObjectKeeper.serverNetLogList);
                     break;
             }
         });
@@ -217,48 +218,46 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     private void updateTop(ServerTOP serverTOP) {
-        if (serverTOP == null) {
-            return;
-        }
         ChartUtil.updateTopBars(serverTOP.serverMem, bcTopMem, true);
         ChartUtil.updateTopBars(serverTOP.serverSWAP, bcTopSwap, true);
         ChartUtil.updateTopBars(serverTOP.serverCPU, bcTopCpu, false);
         ChartUtil.updateServerTasksBars(serverTOP.serverTasks, pcTopTasks);
-        ChartUtil.updateServerCommonText(serverTOP.serverCommon, tvTopCommon);
+        ChartUtil.updateServerCommonText(serverTOP.lastServerCommon, tvTopCommon);
         ChartUtil.buildProcessesTable(serverTOP.serverProcesses, tlProcesses, DetailedActivity.this);
 
     }
 
-    private void updateDiskInfo(ServerDFList serverDFList) {
-        if (serverDFList == null || serverDFList.singleServerDFList.size() == 0) {
+    private void updateDiskInfo(ServerDFObjectKeeper serverDFObjectKeeper) {
+        if (serverDFObjectKeeper == null || serverDFObjectKeeper.singleServerDFList.size() == 0) {
             return;
         }
         if (clDf.getVisibility() == View.GONE) {
             clDf.setVisibility(View.VISIBLE);
         }
-        ChartUtil.updateDiskInfoBars(serverDFList, bcDiskInfo);
+        ChartUtil.updateDiskInfoBars(serverDFObjectKeeper, bcDiskInfo);
         ivDfPdf.setOnClickListener(v -> {
-            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverDFList, ip);
+            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverDFObjectKeeper, ip);
             choosePdfDialog.show(getSupportFragmentManager(), "choose_df_dialog");
         });
     }
 
-    private void updatePsql(List<List<ServerPsql>> serverPSQLS) {
-        if (serverPSQLS == null || serverPSQLS.size() == 0 || serverPSQLS.get(0).size() == 0) {
+    private void updatePsql(ServerPsqlObjectListKeeper serverPsqlObjectListKeeper) {
+        if (serverPsqlObjectListKeeper == null || serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.size() == 0
+                || serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.get(0).serverPsqlList.size() == 0) {
             return;
         }
         if (clPsql.getVisibility() == View.GONE) {
             clPsql.setVisibility(View.VISIBLE);
         }
-        ChartUtil.updatePsqlList(serverPSQLS, lcPsqlXac, true);
-        ChartUtil.updatePsqlList(serverPSQLS, lcPsqlNbe, false);
+        ChartUtil.updatePsqlList(serverPsqlObjectListKeeper, lcPsqlXac, true);
+        ChartUtil.updatePsqlList(serverPsqlObjectListKeeper, lcPsqlNbe, false);
         ivPsqlPdf.setOnClickListener(v -> {
-            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverPSQLS.get(0), ip);
+            ChoosePdfDialog choosePdfDialog = new ChoosePdfDialog(serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.get(0).serverPsqlList, ip);
             choosePdfDialog.show(getSupportFragmentManager(), "choose_psql_dialog");
         });
     }
 
-    private void updateIoTop(ServerIoTopList serverIoTopLists) {
+    private void updateIoTop(ServerIoTopObjectKeeper serverIoTopLists) {
         if (serverIoTopLists == null || serverIoTopLists.serverIoTopList.size() == 0) {
             return;
         }

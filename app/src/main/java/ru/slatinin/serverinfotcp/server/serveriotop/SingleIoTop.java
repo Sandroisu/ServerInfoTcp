@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.server.BaseServerInfo;
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class SingleIoTop extends BaseServerInfo {
 

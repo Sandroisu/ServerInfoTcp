@@ -19,8 +19,8 @@ import ru.slatinin.serverinfotcp.DownloadPdfView;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
-import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
-import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
+import ru.slatinin.serverinfotcp.server.serverdf.ServerDFObjectKeeper;
+import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopObjectKeeper;
 
 public class ChoosePdfDialog extends DialogFragment implements DownloadPdfView.OnCloseDialogListener {
     private final String ip;
@@ -30,14 +30,14 @@ public class ChoosePdfDialog extends DialogFragment implements DownloadPdfView.O
     private final String [] names;
     private final int size;
 
-    public ChoosePdfDialog(ServerDFList serverDFList, String ip) {
+    public ChoosePdfDialog(ServerDFObjectKeeper serverDFObjectKeeper, String ip) {
         this.ip = ip;
         monitor = "df";
         parameter = "&c_disk=";
-        size = serverDFList.singleServerDFList.size();
+        size = serverDFObjectKeeper.singleServerDFList.size();
         names = new String[size];
         for (int i = 0; i < size; i++) {
-            names [i] = serverDFList.singleServerDFList.get(i).c_name;
+            names [i] = serverDFObjectKeeper.singleServerDFList.get(i).c_name;
         }
         title = "Выберите диск";
     }
@@ -54,14 +54,14 @@ public class ChoosePdfDialog extends DialogFragment implements DownloadPdfView.O
         title = "Выберите базу данных";
     }
 
-    public ChoosePdfDialog(ServerIoTopList serverIoTopList, String ip) {
+    public ChoosePdfDialog(ServerIoTopObjectKeeper serverIoTopObjectKeeper, String ip) {
         this.ip = ip;
         monitor = "iotop";
         parameter = "&c_disk=";
-        size = serverIoTopList.serverIoTopList.size();
+        size = serverIoTopObjectKeeper.serverIoTopList.size();
         names = new String[size];
         for (int i = 0; i < size; i++) {
-            names [i] = serverIoTopList.serverIoTopList.get(i).c_device;
+            names [i] = serverIoTopObjectKeeper.serverIoTopList.get(i).c_device;
         }
         title = "Выберите диск";
     }

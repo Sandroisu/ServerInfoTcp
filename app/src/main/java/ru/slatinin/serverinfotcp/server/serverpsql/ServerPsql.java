@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 import ru.slatinin.serverinfotcp.TimeUtil;
 import ru.slatinin.serverinfotcp.server.BaseServerInfo;
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerPsql extends BaseServerInfo {
 
@@ -34,7 +34,17 @@ public class ServerPsql extends BaseServerInfo {
         }
     }
 
-    public void calculateXactCommit(int previous){
+    public ServerPsql(ServerPsql psqlToCopy) {
+        super(psqlToCopy.c_ip);
+        c_datname = psqlToCopy.c_datname;
+        n_xact_commit = psqlToCopy.n_xact_commit;
+        n_numbackends = psqlToCopy.n_numbackends;
+        createTime = psqlToCopy.createTime;
+        time = psqlToCopy.time;
+        n_xact_commit_calculated = psqlToCopy.n_xact_commit_calculated;
+    }
+
+    public void calculateXactCommit(int previous) {
         n_xact_commit_calculated = n_xact_commit - previous;
     }
 }

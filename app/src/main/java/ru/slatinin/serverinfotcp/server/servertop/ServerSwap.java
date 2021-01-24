@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerSwap extends BaseTopInfo{
 
@@ -21,12 +21,8 @@ public class ServerSwap extends BaseTopInfo{
     public int free;
     public int avail_mem;
 
-    public ServerSwap(JsonObject object) {
+    public ServerSwap() {
         super();
-        total = JsonUtil.getInt(object, TOTAL);
-        used = JsonUtil.getInt(object, USED);
-        free = JsonUtil.getInt(object, FREE);
-        avail_mem = JsonUtil.getInt(object, AVAIL_MEM);
     }
 
     protected String getValueByName(String name){
@@ -68,5 +64,12 @@ public class ServerSwap extends BaseTopInfo{
     @Override
     protected List<Field> initFields() {
         return new ArrayList<>(Arrays.asList(getClass().getFields()));
+    }
+
+    public void update(JsonObject object){
+        total = JsonUtil.getInt(object, TOTAL);
+        used = JsonUtil.getInt(object, USED);
+        free = JsonUtil.getInt(object, FREE);
+        avail_mem = JsonUtil.getInt(object, AVAIL_MEM);
     }
 }

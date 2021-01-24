@@ -39,21 +39,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.R;
-import ru.slatinin.serverinfotcp.server.ServerNetLog;
-import ru.slatinin.serverinfotcp.server.serverdf.ServerDFList;
-import ru.slatinin.serverinfotcp.server.ServerNET;
+import ru.slatinin.serverinfotcp.server.servernetlog.ServerNetLog;
+import ru.slatinin.serverinfotcp.server.serverdf.ServerDFObjectKeeper;
+import ru.slatinin.serverinfotcp.server.servernet.ServerNet;
 import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.serverdf.SingleServerDF;
-import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopList;
+import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopObjectKeeper;
 import ru.slatinin.serverinfotcp.server.serveriotop.SingleIoTop;
+import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsqlObjectListKeeper;
 import ru.slatinin.serverinfotcp.server.servertop.BaseTopInfo;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
 import ru.slatinin.serverinfotcp.server.servertop.ServerCpu;
 import ru.slatinin.serverinfotcp.server.servertop.ServerProcesses;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTasks;
 
-import static ru.slatinin.serverinfotcp.server.ServerNET.N_RECEIVED;
-import static ru.slatinin.serverinfotcp.server.ServerNET.N_SENT;
+import static ru.slatinin.serverinfotcp.server.servernet.ServerNet.N_RECEIVED;
+import static ru.slatinin.serverinfotcp.server.servernet.ServerNet.N_SENT;
 
 public class ChartUtil {
 
@@ -144,7 +145,7 @@ public class ChartUtil {
         return lineDataSet;
     }
 
-    public static void updateNetList(List<ServerNET> list, LineChart chart) {
+    public static void updateNetList(List<ServerNet> list, LineChart chart) {
         if (list == null || list.size() == 0) {
             return;
         }
@@ -224,27 +225,48 @@ public class ChartUtil {
         }
     }
 
-    public static void updatePsqlList(List<List<ServerPsql>> serverPsqlLists, LineChart chart, boolean xActCommits) {
-        int[] colors = getBarChartColors(serverPsqlLists.get(0).size());
+    public static void updatePsqlList(ServerPsqlObjectListKeeper serverPsqlObjectListKeeper, LineChart chart, boolean xActCommits) {
+        int linesCount = serverPsqlObjectListKeeper.getLinesCount();
+        int labelCapacity = serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.size();
+        if (xActCommits) {
+            labelCapacity -= 1;
+        }
+        String[] labels = new String[labelCapacity];
+        int[] colors = getBarChartColors(linesCount);
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        String[] labels = new String[serverPsqlLists.size()];
-        for (int j = 0; j < serverPsqlLists.get(0).size(); j++) {
+        for (int i = 0; i < linesCount; i++) {
+            ServerPsql [] serverPsqls = serverPsqlObjectListKeeper.getSinglePsqlLineData(i);
             ArrayList<Entry> entries = new ArrayList<>();
-            for (int k = 0; k < serverPsqlLists.size(); k++) {
+            for (int j = 0; j < serverPsqls.length; j++) {
                 if (xActCommits) {
-                    labels[k] = serverPsqlLists.get(k).get(0).time;
-                    if (k > 0) {
-                        entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_xact_commit_calculated));
+                    if (j > 0) {
+                        labels[j-1] = serverPsqls[j].time;
+                        entries.add(new Entry(j - 1, serverPsqls[j].n_xact_commit_calculated));
                     }
                 } else {
-                    entries.add(new Entry(k, serverPsqlLists.get(k).get(j).n_numbackends));
+                    labels[j] =  serverPsqls[j].time;
+                    entries.add(new Entry(j, serverPsqls[j].n_numbackends));
                 }
             }
-            LineDataSet set = createLineChartSet(new LineDataSet(entries, serverPsqlLists.get(0).get(j).c_datname), colors[j], false, 2f, false);
+            LineDataSet set = createLineChartSet(new LineDataSet(entries, serverPsqlObjectListKeeper.getLineName(i)), colors[i], false, 2f, false);
             dataSets.add(set);
         }
         LineData data = new LineData(dataSets);
-        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        chart.getXAxis().setLabelCount(labels.length + 1, true);
+        chart.getXAxis().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                if (value >= 0) {
+                    if (value < labels.length - 1) {
+                        int index = Math.round(value);
+                        return labels[index];
+                    }
+                    return "";
+                }
+                return "";
+            }
+        });
+        chart.getXAxis().setCenterAxisLabels(true);
         chart.getLegend().setWordWrapEnabled(true);
         chart.setData(data);
         chart.invalidate();
@@ -391,9 +413,9 @@ public class ChartUtil {
         barChart.invalidate();
     }
 
-    public static void updateDiskInfoBars(ServerDFList serverDFList, BarChart barChart) {
+    public static void updateDiskInfoBars(ServerDFObjectKeeper serverDFObjectKeeper, BarChart barChart) {
         List<IBarDataSet> barDataSets;
-        List<SingleServerDF> singleServerDFList = serverDFList.singleServerDFList;
+        List<SingleServerDF> singleServerDFList = serverDFObjectKeeper.singleServerDFList;
         if (barChart.getData() != null &&
                 barChart.getData().getDataSetCount() > 0) {
             barDataSets = barChart.getData().getDataSets();
@@ -437,6 +459,9 @@ public class ChartUtil {
     }
 
     public static void updateServerCommonText(ServerCommon serverCommon, TextView textView) {
+        if (serverCommon == null){
+            return;
+        }
         StringBuilder info = new StringBuilder();
         Field[] commonFields = serverCommon.getClass().getFields();
         for (Field field : commonFields) {
@@ -504,14 +529,14 @@ public class ChartUtil {
         });
     }
 
-    public static void buildTable(ServerIoTopList serverIoTopList, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
+    public static void buildTable(ServerIoTopObjectKeeper serverIoTopObjectKeeper, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
         if (clIoTop != null && clIoTop.getVisibility() == View.GONE) {
             clIoTop.setVisibility(View.VISIBLE);
         }
-        List<SingleIoTop> singleIoTopList = serverIoTopList.serverIoTopList;
+        List<SingleIoTop> singleIoTopList = serverIoTopObjectKeeper.serverIoTopList;
         tlIotop.removeAllViews();
         TableRow namesRow = new TableRow(mContext);
-        for (int i = 0; i < ServerIoTopList.columnNames.length; i++) {
+        for (int i = 0; i < ServerIoTopObjectKeeper.columnNames.length; i++) {
             TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(0, 0, 10, 0);
@@ -520,7 +545,7 @@ public class ChartUtil {
             }
             TextView name = new TextView(mContext);
             name.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
-            String text = ServerIoTopList.columnNames[i] + " ";
+            String text = ServerIoTopObjectKeeper.columnNames[i] + " ";
             name.setText(text);
             name.setLayoutParams(layoutParams);
             name.setPadding(0, 0, 1, 0);

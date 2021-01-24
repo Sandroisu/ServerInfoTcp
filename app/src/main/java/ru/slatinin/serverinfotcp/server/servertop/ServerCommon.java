@@ -1,21 +1,15 @@
 package ru.slatinin.serverinfotcp.server.servertop;
 
-import android.annotation.SuppressLint;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import ru.slatinin.serverinfotcp.TimeUtil;
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerCommon extends BaseTopInfo {
 
@@ -29,11 +23,11 @@ public class ServerCommon extends BaseTopInfo {
     private final String N_LA3 = "n_la3";
     private final String DX_CREATED = "dx_created";
 
-    public String time;
-    public String up_hours;
-    public String user;
-    public String up_days;
-    public float[] load_average;
+    public final String time;
+    public final String up_hours;
+    public final String user;
+    public final String up_days;
+    public final float[] load_average;
 
     public ServerCommon(JsonObject object) {
         super();
@@ -62,6 +56,18 @@ public class ServerCommon extends BaseTopInfo {
             load_average[0] = JsonUtil.getFloat(object, N_LA1);
             load_average[1] = JsonUtil.getFloat(object, N_LA2);
             load_average[2] = JsonUtil.getFloat(object, N_LA3);
+        }
+    }
+
+    public ServerCommon(ServerCommon serverCommon){
+        super();
+        this.time = serverCommon.time;
+        this.up_hours = serverCommon.up_hours;
+        this.user = serverCommon.user;
+        this.up_days = serverCommon.up_days;
+        this.load_average = new float[serverCommon.load_average.length];
+        for (int i = 0; i < serverCommon.load_average.length; i++) {
+            load_average[i] = serverCommon.load_average[i];
         }
     }
 

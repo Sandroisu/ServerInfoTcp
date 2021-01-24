@@ -1,13 +1,11 @@
 package ru.slatinin.serverinfotcp.server.servertop;
 
-import android.icu.lang.UScript;
-
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerProcesses {
     private static final String PID = "pid";

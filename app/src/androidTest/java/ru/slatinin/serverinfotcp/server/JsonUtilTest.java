@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
+
 import static org.junit.Assert.*;
 public class JsonUtilTest {
     private JsonObject jsonIntAndString;

@@ -7,13 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.telecom.Call;
 
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
-import ru.slatinin.serverinfotcp.server.ServerArgs;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 import ru.slatinin.serverinfotcp.server.SingleServer;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.sevice.TcpService;
@@ -33,6 +34,7 @@ import static ru.slatinin.serverinfotcp.ui.MainActivity.SHARED_PREFS;
 
 public class App extends Application implements CallSqlQueryListener {
     private final String ARGS = "args";
+    private final static String REPOS = "repos";
 
     private InfoHolder infoHolder;
     private TcpClient tcpClient;
@@ -61,45 +63,50 @@ public class App extends Application implements CallSqlQueryListener {
     public void connect(String address, String port) {
 
         Thread thread = new Thread(() -> {
-        if (tcpClient != null) {
-            tcpClient.stopClient();
-            infoHolder.clear();
-            infoHolder = new InfoHolder(this);
-            for (OnTcpInfoReceived listener : listenersList) {
-                listener.createTcpInfo(infoHolder);
+            if (tcpClient != null) {
+                tcpClient.stopClient();
+                infoHolder.clear();
+                infoHolder = new InfoHolder(App.this);
+                for (OnTcpInfoReceived listener : listenersList) {
+                    listener.createTcpInfo(infoHolder);
+                }
             }
-        }
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
-                    if (ARGS.equals(dataInfo)) {
-                        ServerArgs serverArgs = new ServerArgs(objects[0]);
-                        saveRepo(serverArgs.repos);
+                    if (objects == null || objects.length == 0) {
                         return;
                     }
-                    int position = -1;
-                    if (DF.equals(dataInfo) || IOTOP.equals(dataInfo) || PSQL.equals(dataInfo)) {
-                        SingleServer info = new SingleServer(ip, dataInfo);
-                        info.init(dataInfo, objects);
-                        position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
-
-                    } else {
-                        if (objects.length > 1) {
-                            SingleServer info = new SingleServer(ip, dataInfo);
-                            info.init(dataInfo, objects);
-                            position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
-                        } else {
-                            for (JsonObject object : objects) {
-                                SingleServer info = new SingleServer(ip, dataInfo);
-                                info.init(dataInfo, object);
-                                position = infoHolder.updateOrAddInfo(info, dataInfo, address, port);
-                            }
-                        }
+                    saveAddressAndPort(address, port);
+                    boolean needCallOldData = false;
+                    switch (dataInfo) {
+                        case ARGS:
+                            saveRepo(JsonUtil.getString(objects[0], REPOS));
+                            return;
+                        case DF:
+                            infoHolder.getSingleServerByIp(ip, dataInfo).updateDF(objects);
+                            break;
+                        case IOTOP:
+                            infoHolder.getSingleServerByIp(ip, dataInfo).updateIoTop(objects);
+                            break;
+                        case PSQL:
+                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updatePsql(objects);
+                            break;
+                        case TOP:
+                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateTop(objects);
+                            break;
+                        case NET:
+                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateNet(objects);
+                            break;
+                        case NET_LOG:
+                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateNetLog(objects);
+                            break;
                     }
-                    if (position >= 0) {
-                        for (OnTcpInfoReceived listener : listenersList) {
-                            listener.updateTcpInfo(infoHolder.getSingleServerList().get(position), dataInfo, position);
-                        }
+                    for (OnTcpInfoReceived listener : listenersList) {
+                        listener.updateTcpInfo(infoHolder.getSingleServerByIp(ip, dataInfo));
+                    }
+                    if (needCallOldData) {
+                        onMustCallOldData(dataInfo, ip);
                     }
                 }
 
@@ -160,47 +167,39 @@ public class App extends Application implements CallSqlQueryListener {
 
     @Override
     public void onMustCallOldData(String dataInfo, String ip) {
-        Thread thread = new Thread(() -> {
-            String databaseName = "";
-            String limit = "";
-            switch (dataInfo) {
-                case TOP:
-                    databaseName = "dbo.cd_top";
-                    limit = "50";
-                    break;
-                case NET_LOG:
-                    databaseName = "dbo.cd_net_log";
-                    limit = "50";
-                    break;
-                case NET:
-                    databaseName = "dbo.cd_net";
-                    limit = "50";
-                    break;
-                case PSQL:
-                    databaseName = "dbo.cd_psql";
-                    limit = "40";
-                    break;
-                case IOTOP:
-                    databaseName = "dbo.cd_iotop";
-                    limit = "5";
-                    break;
-                default:
-                    break;
-            }
-            if (databaseName.isEmpty()) {
-                return;
-            }
-            if (tcpClient != null) {
-                String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
-                        + " where c_ip = '" + ip + "' order by id desc limit " + limit;
-                tcpClient.sendMessage(query);
-            }
-        });
-       thread.start();
-    }
-
-    @Override
-    public void onSaveAddressAndPort(String address, String port) {
-        saveAddressAndPort(address, port);
+        String databaseName = "";
+        String limit = "";
+        switch (dataInfo) {
+            case TOP:
+                databaseName = "dbo.cd_top";
+                limit = "50";
+                break;
+            case NET_LOG:
+                databaseName = "dbo.cd_net_log";
+                limit = "50";
+                break;
+            case NET:
+                databaseName = "dbo.cd_net";
+                limit = "50";
+                break;
+            case PSQL:
+                databaseName = "dbo.cd_psql";
+                limit = "40";
+                break;
+            case IOTOP:
+                databaseName = "dbo.cd_iotop";
+                limit = "5";
+                break;
+            default:
+                break;
+        }
+        if (databaseName.isEmpty()) {
+            return;
+        }
+        if (tcpClient != null) {
+            String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
+                    + " where c_ip = '" + ip + "' order by id desc limit " + limit;
+            tcpClient.sendMessage(query);
+        }
     }
 }

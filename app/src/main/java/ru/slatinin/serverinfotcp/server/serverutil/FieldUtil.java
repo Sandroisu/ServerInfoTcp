@@ -1,4 +1,4 @@
-package ru.slatinin.serverinfotcp.server;
+package ru.slatinin.serverinfotcp.server.serverutil;
 
 import java.lang.reflect.Field;
 

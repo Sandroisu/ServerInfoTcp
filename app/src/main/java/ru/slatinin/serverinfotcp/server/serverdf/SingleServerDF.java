@@ -3,7 +3,7 @@ package ru.slatinin.serverinfotcp.server.serverdf;
 import com.google.gson.JsonObject;
 
 import ru.slatinin.serverinfotcp.server.BaseServerInfo;
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class SingleServerDF extends BaseServerInfo {
 

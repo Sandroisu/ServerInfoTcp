@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerMem extends BaseTopInfo{
 
@@ -19,9 +19,8 @@ public class ServerMem extends BaseTopInfo{
     public int total;
     public int used;
 
-    public ServerMem(JsonObject object) {
-        total = JsonUtil.getInt(object, TOTAL);
-        used = JsonUtil.getInt(object, USED);
+    public ServerMem() {
+
     }
 
     protected String getValueByName(String name){
@@ -59,5 +58,10 @@ public class ServerMem extends BaseTopInfo{
     @Override
     protected List<Field> initFields() {
         return new ArrayList<>(Arrays.asList(getClass().getFields()));
+    }
+
+    public void update(JsonObject object){
+        total = JsonUtil.getInt(object, TOTAL);
+        used = JsonUtil.getInt(object, USED);
     }
 }

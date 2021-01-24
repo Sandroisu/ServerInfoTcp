@@ -1,38 +1,28 @@
-package ru.slatinin.serverinfotcp.server;
+package ru.slatinin.serverinfotcp.server.servernet;
 
 import com.google.gson.JsonObject;
 
 import ru.slatinin.serverinfotcp.TimeUtil;
+import ru.slatinin.serverinfotcp.server.BaseServerInfo;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
-public class ServerNetLog extends BaseServerInfo {
+public class ServerNet extends BaseServerInfo {
 
     public static final String C_NAME = "c_name";
     public static final String N_SENT = "n_sent";
     public static final String N_RECEIVED = "n_received";
-    public static final String C_SENT_NAME = "c_sent_name";
-    public static final String C_RECEIVED_NAME = "c_received_name";
-    public static final String N_RATE = "n_rate";
-    public static final String C_RATE_NAME = "c_rate_name";
     private final String DX_CREATED = "dx_created";
 
     public final String c_name;
-    public final String c_sent_name;
-    public final String c_received_name;
-    public final String c_rate_name;
     public final float n_sent;
     public final float n_received;
-    public final float n_rate;
     public final String time;
 
-    public ServerNetLog(JsonObject object) {
+    public ServerNet(JsonObject object) {
         super(object);
         c_name = JsonUtil.getString(object, C_NAME);
-        c_sent_name = JsonUtil.getString(object, C_SENT_NAME);
-        c_received_name = JsonUtil.getString(object, C_RECEIVED_NAME);
-        c_rate_name = JsonUtil.getString(object, C_RATE_NAME);
         n_sent = JsonUtil.getFloat(object, N_SENT);
         n_received = JsonUtil.getFloat(object, N_RECEIVED);
-        n_rate = JsonUtil.getFloat(object, N_RATE);
         if (object.has(DX_CREATED)) {
             time = TimeUtil.formatTimeToMinutes(JsonUtil.getString(object, DX_CREATED));
         } else {
@@ -40,4 +30,15 @@ public class ServerNetLog extends BaseServerInfo {
         }
     }
 
+    public ServerNet(ServerNet serverNet) {
+        super(serverNet.c_ip);
+        this.c_name = serverNet.c_name;
+        this.n_sent = serverNet.n_sent;
+        this.n_received = serverNet.n_received;
+        this.time = serverNet.time;
+    }
+
+    public String getInfoString() {
+        return N_SENT + " - " + n_sent + "KB/s;\t\t" + N_RECEIVED + " - " + n_received + "Kb/s;";
+    }
 }

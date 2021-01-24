@@ -31,6 +31,7 @@ public class TcpService extends Service {
                 .setContentText("Фоновый режим запущен").setPriority(PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE).build();
         startForeground(1411, notification);
+
         App app = (App) getApplication();
         tcpClient = app.getTcpClient();
     }

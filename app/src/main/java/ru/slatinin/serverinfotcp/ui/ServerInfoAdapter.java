@@ -121,16 +121,16 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
                     if (clNet.getVisibility() == View.GONE) {
                         clNet.setVisibility(View.VISIBLE);
                     }
-                    String netInfo = info.getLastServerNET().getInfoString();
+                    String netInfo = info.serverNetObjectKeeper.getLastNetObject().getInfoString();
                     tvNet.setText(netInfo);
                     break;
                 case TOP:
-                    ChartUtil.updateTopBars(info.getServerTOP().serverMem, bcMem, true);
-                    ChartUtil.updateCpuList(info.getServerCommonList(), lcCPU);
+                    ChartUtil.updateTopBars(info.serverTOP.serverMem, bcMem, true);
+                    ChartUtil.updateCpuList(info.serverTOP.serverCommonList, lcCPU);
                     break;
             }
-            if (info.getServerIoTopList()!= null && info.getServerIoTopList().serverIoTopList.size() > 0) {
-                ChartUtil.buildTable(info.getServerIoTopList(), clIoTop, tlIotop, mContext);
+            if (info.serverIoTopObjectKeeper!= null && info.serverIoTopObjectKeeper.serverIoTopList.size() > 0) {
+                ChartUtil.buildTable(info.serverIoTopObjectKeeper, clIoTop, tlIotop, mContext);
             }
         }
 

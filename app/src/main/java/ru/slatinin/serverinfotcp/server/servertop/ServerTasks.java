@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerTasks extends BaseTopInfo{
 
@@ -23,13 +23,8 @@ public class ServerTasks extends BaseTopInfo{
     public int stopped;
     public int zombie;
 
-    public ServerTasks(JsonObject object) {
+    public ServerTasks() {
         super();
-        total = JsonUtil.getInt(object, TOTAL);
-        running = JsonUtil.getInt(object, RUNNING);
-        sleeping = JsonUtil.getInt(object, SLEEPING);
-        stopped = JsonUtil.getInt(object, STOPPED);
-        zombie = JsonUtil.getInt(object, ZOMBIE);
     }
 
     protected String getValueByName(String name){
@@ -73,5 +68,13 @@ public class ServerTasks extends BaseTopInfo{
     @Override
     protected List<Field> initFields() {
         return new ArrayList<>(Arrays.asList(getClass().getFields()));
+    }
+
+    public void update(JsonObject object){
+        total = JsonUtil.getInt(object, TOTAL);
+        running = JsonUtil.getInt(object, RUNNING);
+        sleeping = JsonUtil.getInt(object, SLEEPING);
+        stopped = JsonUtil.getInt(object, STOPPED);
+        zombie = JsonUtil.getInt(object, ZOMBIE);
     }
 }

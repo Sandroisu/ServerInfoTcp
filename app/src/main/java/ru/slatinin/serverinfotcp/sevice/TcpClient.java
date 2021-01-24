@@ -18,16 +18,11 @@ import ru.slatinin.serverinfotcp.pack.PackageUtil;
 import ru.slatinin.serverinfotcp.pack.RPCResult;
 
 public class TcpClient {
-    public String server_address; // your computer IP
-    // address
+    public String server_address;
     public String server_port;
-    // sends message received notifications
     private OnMessageReceivedListener mMessageListener = null;
-    // while this is true, the server will continue running
     private boolean mRun = false;
-    // used to send messages
     private PrintWriter mBufferOut;
-    // used to read messages from the server
     private BufferedReader mBufferIn;
 
     private String uid;
@@ -48,10 +43,13 @@ public class TcpClient {
      * @param message text entered by client
      */
     public void sendMessage(String message) {
-        if (mBufferOut != null && !mBufferOut.checkError()) {
-            mBufferOut.print(message);
-            mBufferOut.flush();
-        }
+        Thread thread = new Thread(() -> {
+            if (mBufferOut != null && !mBufferOut.checkError()) {
+                mBufferOut.print(message);
+                mBufferOut.flush();
+            }
+        });
+        thread.start();
     }
 
     /**

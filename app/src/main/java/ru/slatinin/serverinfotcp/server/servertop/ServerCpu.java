@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.JsonUtil;
+import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerCpu extends BaseTopInfo{
 
@@ -29,16 +29,8 @@ public class ServerCpu extends BaseTopInfo{
     public float si;
     public float st;
 
-    public ServerCpu(JsonObject object) {
+    public ServerCpu() {
         super();
-        us = JsonUtil.getFloat(object, US);
-        sy = JsonUtil.getFloat(object, SY);
-        ni = JsonUtil.getFloat(object, NI);
-        id = JsonUtil.getFloat(object, ID);
-        wa = JsonUtil.getFloat(object, WA);
-        hi = JsonUtil.getFloat(object, HI);
-        si = JsonUtil.getFloat(object, SI);
-        st = JsonUtil.getFloat(object, ST);
     }
 
     protected String getValueByName(String name){
@@ -88,5 +80,16 @@ public class ServerCpu extends BaseTopInfo{
     @Override
     protected List<Field> initFields() {
         return new ArrayList<>(Arrays.asList(getClass().getFields()));
+    }
+
+    public void update(JsonObject object) {
+        us = JsonUtil.getFloat(object, US);
+        sy = JsonUtil.getFloat(object, SY);
+        ni = JsonUtil.getFloat(object, NI);
+        id = JsonUtil.getFloat(object, ID);
+        wa = JsonUtil.getFloat(object, WA);
+        hi = JsonUtil.getFloat(object, HI);
+        si = JsonUtil.getFloat(object, SI);
+        st = JsonUtil.getFloat(object, ST);
     }
 }
