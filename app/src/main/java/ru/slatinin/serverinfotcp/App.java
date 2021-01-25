@@ -42,13 +42,10 @@ public class App extends Application implements CallSqlQueryListener {
     private volatile InfoHolder infoHolder;
     private volatile TcpClient tcpClient;
     private ArrayList<OnTcpInfoReceived> listenersList;
-    private AtomicInteger atomicInteger;
-
     @Override
     public void onCreate() {
         super.onCreate();
         NotificationChannel channel;
-        atomicInteger.get();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channel = new NotificationChannel(TcpService.NOTIFICATION_CHANEL_ID,
                     "TcpClientChannel", NotificationManager.IMPORTANCE_DEFAULT);
