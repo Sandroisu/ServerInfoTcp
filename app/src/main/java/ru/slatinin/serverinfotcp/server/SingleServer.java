@@ -98,6 +98,7 @@ public class SingleServer {
     public boolean updateNetLog(JsonObject[] objects) {
         dataInfo = NET_LOG;
         serverNetLogObjectKeeper.update(objects);
+        serverNetLogObjectKeeper.calculateDiff();
         return needCall(NET_LOG);
     }
 }

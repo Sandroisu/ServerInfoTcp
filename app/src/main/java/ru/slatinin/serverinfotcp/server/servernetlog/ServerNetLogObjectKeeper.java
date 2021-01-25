@@ -37,4 +37,14 @@ public class ServerNetLogObjectKeeper {
             temp.clear();
         }
     }
+
+    public void calculateDiff(){
+        if (serverNetLogList.size()<2){
+            return;
+        }
+        for (int i = 1; i <serverNetLogList.size(); i++) {
+            serverNetLogList.get(i).calculateValues(serverNetLogList.get(i-1).n_received,
+                    serverNetLogList.get(i-1).n_sent);
+        }
+    }
 }

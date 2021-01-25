@@ -173,19 +173,19 @@ public class ChartUtil {
     public static void updateNetLogList(List<ServerNetLog> serverNetLogList, LineChart lineChart) {
         ArrayList<Entry> newSentValues = new ArrayList<>();
         ArrayList<Entry> newReceivedValues = new ArrayList<>();
-        String[] labels = new String[serverNetLogList.size()];
-        for (int i = 0; i < serverNetLogList.size(); i++) {
-            newSentValues.add(new Entry(i, serverNetLogList.get(i).n_sent));
-            newReceivedValues.add(new Entry(i, serverNetLogList.get(i).n_received));
-            labels[i] = serverNetLogList.get(i).time;
+        String[] labels = new String[serverNetLogList.size() - 1];
+        for (int i = 1; i < serverNetLogList.size(); i++) {
+            newSentValues.add(new Entry(i - 1, serverNetLogList.get(i).n_sent_calculated));
+            newReceivedValues.add(new Entry(i - 1, serverNetLogList.get(i).n_received_calculated));
+            labels[i - 1] = serverNetLogList.get(i).time;
         }
         LineDataSet sentSet;
         LineDataSet receivedSet;
         sentSet = new LineDataSet(newSentValues, N_SENT);
         receivedSet = new LineDataSet(newReceivedValues, N_RECEIVED);
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(createLineChartSet(sentSet, Color.parseColor("#18ffff"), false, 2f, false));
-        dataSets.add(createLineChartSet(receivedSet, Color.parseColor("#33691e"), false, 2f, false));
+        dataSets.add(createLineChartSet(sentSet, Color.parseColor("#b71c1c"), false, 1f, false));
+        dataSets.add(createLineChartSet(receivedSet, Color.parseColor("#33691e"), false, 1f, false));
         LineData data = new LineData(dataSets);
         lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         lineChart.setData(data);
@@ -204,7 +204,11 @@ public class ChartUtil {
             first.add(new Entry(i, serverCommonList.get(i).load_average[0]));
             second.add(new Entry(i, serverCommonList.get(i).load_average[1]));
             third.add(new Entry(i, serverCommonList.get(i).load_average[2]));
-            labels[i] = serverCommonList.get(i).time;
+            try {
+                labels[i] = serverCommonList.get(i).time;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
         }
         LineDataSet firstSet;
         LineDataSet secondSet;
@@ -235,16 +239,16 @@ public class ChartUtil {
         int[] colors = getBarChartColors(linesCount);
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         for (int i = 0; i < linesCount; i++) {
-            ServerPsql [] serverPsqls = serverPsqlObjectListKeeper.getSinglePsqlLineData(i);
+            ServerPsql[] serverPsqls = serverPsqlObjectListKeeper.getSinglePsqlLineData(i);
             ArrayList<Entry> entries = new ArrayList<>();
             for (int j = 0; j < serverPsqls.length; j++) {
                 if (xActCommits) {
                     if (j > 0) {
-                        labels[j-1] = serverPsqls[j].time;
+                        labels[j - 1] = serverPsqls[j].time;
                         entries.add(new Entry(j - 1, serverPsqls[j].n_xact_commit_calculated));
                     }
                 } else {
-                    labels[j] =  serverPsqls[j].time;
+                    labels[j] = serverPsqls[j].time;
                     entries.add(new Entry(j, serverPsqls[j].n_numbackends));
                 }
             }
@@ -459,7 +463,7 @@ public class ChartUtil {
     }
 
     public static void updateServerCommonText(ServerCommon serverCommon, TextView textView) {
-        if (serverCommon == null){
+        if (serverCommon == null) {
             return;
         }
         StringBuilder info = new StringBuilder();

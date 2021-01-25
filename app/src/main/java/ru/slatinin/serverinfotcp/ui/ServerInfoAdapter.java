@@ -69,7 +69,7 @@ public class ServerInfoAdapter extends RecyclerView.Adapter<ServerInfoAdapter.Se
         return singleServerList.size();
     }
 
-    protected static class ServerInfoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ServerInfoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final LineChart lcCPU;
         private final BarChart bcMem;
         private final TextView tvIp;

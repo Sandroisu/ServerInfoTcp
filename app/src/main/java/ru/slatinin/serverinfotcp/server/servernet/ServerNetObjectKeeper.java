@@ -29,16 +29,20 @@ public class ServerNetObjectKeeper {
             for (int i = 0; i < serverNetList.size(); i++) {
                 temp.add(new ServerNet(serverNetList.get(i)));
             }
-            serverNetList.clear();
             for (int i = 0; i < objects.length; i++) {
-                serverNetList.add(new ServerNet(objects[i]));
+                if (i < temp.size()) {
+                    serverNetList.set(i, new ServerNet(objects[i]));
+                } else {
+                    serverNetList.add(new ServerNet(objects[i]));
+                }
             }
             Collections.reverse(serverNetList);
             serverNetList.addAll(temp);
             temp.clear();
         }
     }
-    public ServerNet getLastNetObject(){
-        return serverNetList.get(serverNetList.size()-1);
+
+    public ServerNet getLastNetObject() {
+        return serverNetList.get(serverNetList.size() - 1);
     }
 }

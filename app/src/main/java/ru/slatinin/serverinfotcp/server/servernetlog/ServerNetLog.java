@@ -24,6 +24,8 @@ public class ServerNetLog extends BaseServerInfo {
     public final String c_rate_name;
     public final float n_sent;
     public final float n_received;
+    public float n_received_calculated;
+    public float n_sent_calculated;
     public final float n_rate;
     public final String time;
 
@@ -41,6 +43,8 @@ public class ServerNetLog extends BaseServerInfo {
         } else {
             time = TimeUtil.formatMillisToMinutes(System.currentTimeMillis());
         }
+        n_received_calculated = 0f;
+        n_sent_calculated = 0f;
     }
 
     public ServerNetLog(ServerNetLog serverNetLog) {
@@ -53,6 +57,11 @@ public class ServerNetLog extends BaseServerInfo {
         n_received = serverNetLog.n_received;
         n_rate = serverNetLog.n_rate;
         time = serverNetLog.time;
+    }
+
+    public void calculateValues(float oldReceived, float oldSent) {
+        n_received_calculated = n_received - oldReceived;
+        n_sent_calculated = n_sent - oldSent;
     }
 
 }

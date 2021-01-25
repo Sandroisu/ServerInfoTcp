@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.serverdf.SingleServerDF;
-
 public class ServerIoTopObjectKeeper {
 
     public final List<SingleIoTop> serverIoTopList;

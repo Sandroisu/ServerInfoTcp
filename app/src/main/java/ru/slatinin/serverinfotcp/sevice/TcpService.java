@@ -46,6 +46,6 @@ public class TcpService extends Service {
         if (tcpClient == null) {
             tcpClient = app.getTcpClient();
         }
-        return Service.START_STICKY;
+        return Service.START_NOT_STICKY;
     }
 }

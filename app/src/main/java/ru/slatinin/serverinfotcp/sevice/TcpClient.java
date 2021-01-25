@@ -99,7 +99,6 @@ public class TcpClient {
                         }
                     } else {
                         mMessageListener.onErrorOccurred(message);
-                        sendMessage("Hello, World!!!");
                     }
                 }
             } catch (Exception e) {

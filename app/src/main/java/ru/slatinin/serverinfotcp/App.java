@@ -7,11 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.telecom.Call;
 
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
@@ -36,14 +39,16 @@ public class App extends Application implements CallSqlQueryListener {
     private final String ARGS = "args";
     private final static String REPOS = "repos";
 
-    private InfoHolder infoHolder;
-    private TcpClient tcpClient;
+    private volatile InfoHolder infoHolder;
+    private volatile TcpClient tcpClient;
     private ArrayList<OnTcpInfoReceived> listenersList;
+    private AtomicInteger atomicInteger;
 
     @Override
     public void onCreate() {
         super.onCreate();
         NotificationChannel channel;
+        atomicInteger.get();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channel = new NotificationChannel(TcpService.NOTIFICATION_CHANEL_ID,
                     "TcpClientChannel", NotificationManager.IMPORTANCE_DEFAULT);
@@ -61,8 +66,6 @@ public class App extends Application implements CallSqlQueryListener {
     }
 
     public void connect(String address, String port) {
-
-        Thread thread = new Thread(() -> {
             if (tcpClient != null) {
                 tcpClient.stopClient();
                 infoHolder.clear();
@@ -71,6 +74,7 @@ public class App extends Application implements CallSqlQueryListener {
                     listener.createTcpInfo(infoHolder);
                 }
             }
+        Thread thread = new Thread(() -> {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
@@ -142,7 +146,7 @@ public class App extends Application implements CallSqlQueryListener {
         editor.apply();
     }
 
-    private void saveRepo(String repo) {
+    public void saveRepo(String repo) {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(REPO, repo);
@@ -201,5 +205,10 @@ public class App extends Application implements CallSqlQueryListener {
                     + " where c_ip = '" + ip + "' order by id desc limit " + limit;
             tcpClient.sendMessage(query);
         }
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
     }
 }
