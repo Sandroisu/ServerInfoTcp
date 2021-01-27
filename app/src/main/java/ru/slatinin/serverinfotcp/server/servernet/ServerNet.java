@@ -38,7 +38,7 @@ public class ServerNet extends BaseServerInfo {
         this.time = serverNet.time;
     }
 
-    public String getInfoString() {
+    public synchronized String getInfoString() {
         return N_SENT + " - " + n_sent + "KB/s;\t\t" + N_RECEIVED + " - " + n_received + "Kb/s;";
     }
 }

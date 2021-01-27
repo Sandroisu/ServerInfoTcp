@@ -52,11 +52,6 @@ public class SingleIoTop extends BaseServerInfo {
         serverIoTopStringValues.add(formatDouble(write));
     }
 
-    protected List<String> getServerIoTopStringValues() {
-        return serverIoTopStringValues;
-
-    }
-
     private String formatDouble(double num){
         String readString = "";
         if (num > 1) {

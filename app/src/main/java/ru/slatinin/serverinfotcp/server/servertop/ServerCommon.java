@@ -66,9 +66,7 @@ public class ServerCommon extends BaseTopInfo {
         this.user = serverCommon.user;
         this.up_days = serverCommon.up_days;
         this.load_average = new float[serverCommon.load_average.length];
-        for (int i = 0; i < serverCommon.load_average.length; i++) {
-            load_average[i] = serverCommon.load_average[i];
-        }
+        System.arraycopy(serverCommon.load_average, 0, load_average, 0, serverCommon.load_average.length);
     }
 
     public String getValueByName(String name) {

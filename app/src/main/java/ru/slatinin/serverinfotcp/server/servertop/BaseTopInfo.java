@@ -1,14 +1,11 @@
 package ru.slatinin.serverinfotcp.server.servertop;
 
-
-import android.graphics.Color;
-
 import java.lang.reflect.Field;
 import java.util.List;
 
 public abstract class BaseTopInfo {
 
-    protected List<Field> fields;
+    protected final List<Field> fields;
 
     public abstract String [] getFieldAsLabels();
 

@@ -38,17 +38,17 @@ public class MetaSize {
     /**
      * Длина метаинформации
      */
-    public int metaSize;
+    public final int metaSize;
 
     /**
      * Статус обработки пакета
      */
-    public int status;
+    public final int status;
 
     /**
      * Тип пакета
      */
-    public String type;
+    public final String type;
 
     public MetaSize(int metaSize, int status, String type) {
         this.metaSize = metaSize;

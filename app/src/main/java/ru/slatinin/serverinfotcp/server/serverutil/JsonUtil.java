@@ -87,14 +87,4 @@ public class JsonUtil {
         return 0f;
     }
 
-    public static boolean getBoolean(JsonObject object, String key) {
-        if (object != null && object.has(key)) {
-            try {
-                return object.get(key).getAsBoolean();
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
 }

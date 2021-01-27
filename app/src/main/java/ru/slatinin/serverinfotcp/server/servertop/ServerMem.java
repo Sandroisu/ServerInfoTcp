@@ -13,24 +13,12 @@ public class ServerMem extends BaseTopInfo{
 
     private final String TOTAL = "total";
     private final String USED = "used";
-    private final String FREE = "free";
-    private final String BUFF_CACHE = "buff_cache";
 
     public int total;
     public int used;
 
     public ServerMem() {
 
-    }
-
-    protected String getValueByName(String name){
-        switch (name){
-            case TOTAL:
-                return String.valueOf(total);
-            case USED:
-                return String.valueOf(used);
-        }
-        return "";
     }
 
     @Override

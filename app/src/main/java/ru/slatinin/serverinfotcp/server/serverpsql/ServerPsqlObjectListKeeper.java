@@ -14,7 +14,7 @@ public class ServerPsqlObjectListKeeper {
 
     public ServerPsqlObjectListKeeper() {
         psqlTabelsCount = 0;
-        serverPsqlObjectKeeperList = new ArrayList<>();
+        serverPsqlObjectKeeperList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void updatePsqlKeeper(JsonObject[] jsonObjects) {

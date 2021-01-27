@@ -7,18 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.telecom.Call;
 
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
-import ru.slatinin.serverinfotcp.server.SingleServer;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.sevice.TcpService;
 import ru.slatinin.serverinfotcp.ui.OnTcpInfoReceived;
@@ -39,9 +34,10 @@ public class App extends Application implements CallSqlQueryListener {
     private final String ARGS = "args";
     private final static String REPOS = "repos";
 
-    private volatile InfoHolder infoHolder;
-    private volatile TcpClient tcpClient;
+    private InfoHolder infoHolder;
+    private TcpClient tcpClient;
     private ArrayList<OnTcpInfoReceived> listenersList;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -63,21 +59,24 @@ public class App extends Application implements CallSqlQueryListener {
     }
 
     public void connect(String address, String port) {
-            if (tcpClient != null) {
-                tcpClient.stopClient();
-                infoHolder.clear();
-                infoHolder = new InfoHolder(App.this);
-                for (OnTcpInfoReceived listener : listenersList) {
-                    listener.createTcpInfo(infoHolder);
-                }
+        if (tcpClient != null) {
+            tcpClient.stopClient();
+            infoHolder.clear();
+            tcpClient = null;
+            infoHolder = null;
+            infoHolder = new InfoHolder(App.this);
+            for (OnTcpInfoReceived listener : listenersList) {
+                listener.createTcpInfo(infoHolder);
             }
+        }
         Thread thread = new Thread(() -> {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
-                public void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
+                public synchronized void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
                     if (objects == null || objects.length == 0) {
                         return;
                     }
+                    int position = -1;
                     saveAddressAndPort(address, port);
                     boolean needCallOldData = false;
                     switch (dataInfo) {
@@ -85,26 +84,34 @@ public class App extends Application implements CallSqlQueryListener {
                             saveRepo(JsonUtil.getString(objects[0], REPOS));
                             return;
                         case DF:
-                            infoHolder.getSingleServerByIp(ip, dataInfo).updateDF(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            infoHolder.getSingleServerList().get(position).updateDF(objects);
                             break;
                         case IOTOP:
-                            infoHolder.getSingleServerByIp(ip, dataInfo).updateIoTop(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            infoHolder.getSingleServerList().get(position).updateIoTop(objects);
                             break;
                         case PSQL:
-                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updatePsql(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            needCallOldData = infoHolder.getSingleServerList().get(position).updatePsql(objects);
                             break;
                         case TOP:
-                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateTop(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            needCallOldData = infoHolder.getSingleServerList().get(position).updateTop(objects);
                             break;
                         case NET:
-                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateNet(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            needCallOldData = infoHolder.getSingleServerList().get(position).updateNet(objects);
                             break;
                         case NET_LOG:
-                            needCallOldData = infoHolder.getSingleServerByIp(ip, dataInfo).updateNetLog(objects);
+                            position = infoHolder.getSingleServerByIp(ip, dataInfo);
+                            needCallOldData = infoHolder.getSingleServerList().get(position).updateNetLog(objects);
                             break;
                     }
-                    for (OnTcpInfoReceived listener : listenersList) {
-                        listener.updateTcpInfo(infoHolder.getSingleServerByIp(ip, dataInfo));
+                    if (position >= 0) {
+                        for (OnTcpInfoReceived listener : listenersList) {
+                            listener.updateTcpInfo(position);
+                        }
                     }
                     if (needCallOldData) {
                         onMustCallOldData(dataInfo, ip);
@@ -129,9 +136,9 @@ public class App extends Application implements CallSqlQueryListener {
         StringBuilder sb = new StringBuilder();
         if (!prefAddress.isEmpty()) {
             String[] playlists = prefAddress.split("\\)\\(");
-            for (int i = 0; i < playlists.length; i++) {
-                if (!playlists[i].equals(address)) {
-                    sb.append(playlists[i]).append(")(");
+            for (String playlist : playlists) {
+                if (!playlist.equals(address)) {
+                    sb.append(playlist).append(")(");
                 }
             }
         }
@@ -167,7 +174,7 @@ public class App extends Application implements CallSqlQueryListener {
     }
 
     @Override
-    public void onMustCallOldData(String dataInfo, String ip) {
+    public synchronized void onMustCallOldData(String dataInfo, String ip) {
         String databaseName = "";
         String limit = "";
         switch (dataInfo) {
@@ -205,7 +212,10 @@ public class App extends Application implements CallSqlQueryListener {
     }
 
     @Override
-    public void onTerminate() {
-        super.onTerminate();
+    public void firstTimeInserted(int position) {
+        for (OnTcpInfoReceived listener : listenersList) {
+            listener.insertNewRvItem(position);
+        }
     }
+
 }

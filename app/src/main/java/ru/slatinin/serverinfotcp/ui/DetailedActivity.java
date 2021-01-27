@@ -27,7 +27,6 @@ import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.UrlUtil;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.servernetlog.ServerNetLog;
-import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.SingleServer;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFObjectKeeper;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopObjectKeeper;
@@ -145,7 +144,7 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
         btnShowProcesses.setOnClickListener(v -> {
             if (tlProcesses.getVisibility() == View.GONE) {
                 tlProcesses.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 tlProcesses.setVisibility(View.GONE);
             }
         });
@@ -172,7 +171,9 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
 
 
     @Override
-    public void updateTcpInfo(SingleServer info) {
+    public void updateTcpInfo(int position) {
+        App app = (App) getApplication();
+        SingleServer info = app.getInfoHolder().getSingleServerList().get(position);
         runOnUiThread(() -> {
             if (!info.ip.equals(ip)) {
                 return;
@@ -214,6 +215,11 @@ public class DetailedActivity extends AppCompatActivity implements OnTcpInfoRece
             btnReconnect.setVisibility(View.VISIBLE);
             tvError.setText(errorMessage);
         });
+    }
+
+    @Override
+    public void insertNewRvItem(int position) {
+
     }
 
 

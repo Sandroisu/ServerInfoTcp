@@ -13,7 +13,7 @@ import ru.slatinin.serverinfotcp.App;
 import static androidx.core.app.NotificationCompat.PRIORITY_DEFAULT;
 
 public class TcpService extends Service {
-    private TcpClient tcpClient;
+    private volatile TcpClient tcpClient;
 
     public final static String NOTIFICATION_CHANEL_ID = "tcpService";
 

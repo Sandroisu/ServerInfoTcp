@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.server.servernet.ServerNet;
-
 public class ServerNetLogObjectKeeper {
     public final List<ServerNetLog> serverNetLogList;
 
     public ServerNetLogObjectKeeper() {
-        serverNetLogList = new ArrayList<>();
+        serverNetLogList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void update(JsonObject[] objects) {
@@ -29,8 +27,8 @@ public class ServerNetLogObjectKeeper {
                 temp.add(new ServerNetLog(serverNetLogList.get(i)));
             }
             serverNetLogList.clear();
-            for (int i = 0; i < objects.length; i++) {
-                serverNetLogList.add(new ServerNetLog(objects[i]));
+            for (JsonObject object : objects) {
+                serverNetLogList.add(new ServerNetLog(object));
             }
             Collections.reverse(serverNetLogList);
             serverNetLogList.addAll(temp);

@@ -2,7 +2,6 @@ package ru.slatinin.serverinfotcp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.pdf.PdfDocument;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;

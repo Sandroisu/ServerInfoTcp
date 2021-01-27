@@ -18,14 +18,12 @@ import ru.slatinin.serverinfotcp.pack.PackageUtil;
 import ru.slatinin.serverinfotcp.pack.RPCResult;
 
 public class TcpClient {
-    public String server_address;
-    public String server_port;
+    public final String server_address;
+    public final String server_port;
     private OnMessageReceivedListener mMessageListener = null;
     private boolean mRun = false;
     private PrintWriter mBufferOut;
     private BufferedReader mBufferIn;
-
-    private String uid;
 
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages
@@ -43,13 +41,10 @@ public class TcpClient {
      * @param message text entered by client
      */
     public void sendMessage(String message) {
-        Thread thread = new Thread(() -> {
-            if (mBufferOut != null && !mBufferOut.checkError()) {
-                mBufferOut.print(message);
-                mBufferOut.flush();
-            }
-        });
-        thread.start();
+        if (mBufferOut != null && !mBufferOut.checkError()) {
+            mBufferOut.print(message);
+            mBufferOut.flush();
+        }
     }
 
     /**
@@ -71,6 +66,7 @@ public class TcpClient {
     public void run() {
 
         mRun = true;
+        int retry = 0;
 
         try {
             InetAddress serverAddr = InetAddress.getByName(server_address);
@@ -93,14 +89,23 @@ public class TcpClient {
                         PackageReadUtils packageReadUtils = new PackageReadUtils(y, false);
                         RPCResult[] results = packageReadUtils.getFromResult();
                         if (mMessageListener != null && results.length > 0 && metaPackage != null) {
-                            if (results[0].result != null) {
+                            if (results[0].result != null && mRun) {
                                 mMessageListener.onServerMessageReceived(results[0].result.records, metaPackage.id, metaPackage.dataInfo);
                             }
                         }
                     } else {
-                        mMessageListener.onErrorOccurred(message);
+                        if (mMessageListener != null) {
+                            if (retry == 0) {
+                                mMessageListener.onErrorOccurred("Проблема при чтении входящего потока");
+                            } else {
+                                sendMessage("Hello, World!!!");
+                            }
+                        }
+                        retry = 1;
                     }
+
                 }
+
             } catch (Exception e) {
                 if (mMessageListener != null) {
                     mMessageListener.onErrorOccurred(getStackTrace(e));

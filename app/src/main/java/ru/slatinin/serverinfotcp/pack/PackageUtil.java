@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream;
 
 public class PackageUtil {
 
-    public static int BUFFER_SIZE = 2048;
+    public final static int BUFFER_SIZE = 2048;
 
     public static MetaSize readSize(byte[] bytes) throws Exception {
         if (bytes.length >= 16) {

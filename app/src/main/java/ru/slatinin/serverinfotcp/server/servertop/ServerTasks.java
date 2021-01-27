@@ -27,22 +27,6 @@ public class ServerTasks extends BaseTopInfo{
         super();
     }
 
-    protected String getValueByName(String name){
-        switch (name){
-            case TOTAL:
-                return String.valueOf(total);
-            case RUNNING:
-                return String.valueOf(running);
-            case SLEEPING:
-                return String.valueOf(sleeping);
-            case STOPPED:
-                return String.valueOf(stopped);
-            case ZOMBIE:
-                return String.valueOf(zombie);
-        }
-        return "";
-    }
-
     @Override
     public String[] getFieldAsLabels() {
         String[] labels = new String[fields.size()];

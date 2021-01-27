@@ -58,7 +58,7 @@ import static ru.slatinin.serverinfotcp.server.servernet.ServerNet.N_SENT;
 
 public class ChartUtil {
 
-    public static void initBarChart(BarChart barChart, boolean leftAxisEnable, boolean descriptionEnable, boolean xAxisEnabled,
+    public synchronized static void initBarChart(BarChart barChart, boolean leftAxisEnable, boolean descriptionEnable, boolean xAxisEnabled,
                                     boolean wordWrapEnabled) {
         barChart.setDrawBarShadow(false);
         barChart.setDrawValueAboveBar(true);
@@ -87,7 +87,7 @@ public class ChartUtil {
         barChart.animateXY(500, 1500);
     }
 
-    public static void initPieChart(PieChart pieChart) {
+    public synchronized static void initPieChart(PieChart pieChart) {
         pieChart.setUsePercentValues(true);
         pieChart.setDrawEntryLabels(false);
         Legend legend = pieChart.getLegend();
@@ -103,7 +103,7 @@ public class ChartUtil {
         pieChart.animateXY(1500, 1500);
     }
 
-    public static void initLineChart(LineChart lineChart, boolean nullDescription) {
+    public synchronized static void initLineChart(LineChart lineChart, boolean nullDescription) {
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         //xAxis.enableGridDashedLine(10f, 10f, 0f);
@@ -126,7 +126,7 @@ public class ChartUtil {
         lineChart.getLegend().setForm(Legend.LegendForm.CIRCLE);
     }
 
-    private static LineDataSet createLineChartSet(LineDataSet lineDataSet, int lineColor, boolean filled, float lineWidth, boolean dashed) {
+    private synchronized static LineDataSet createLineChartSet(LineDataSet lineDataSet, int lineColor, boolean filled, float lineWidth, boolean dashed) {
         lineDataSet.setDrawIcons(false);
         if (dashed) {
             lineDataSet.enableDashedLine(10f, 5f, 0f);
@@ -192,7 +192,7 @@ public class ChartUtil {
         lineChart.invalidate();
     }
 
-    public static void updateCpuList(List<ServerCommon> serverCommonList, LineChart lcNetInfo) {
+    public synchronized static void updateCpuList(List<ServerCommon> serverCommonList, LineChart lcNetInfo) {
         if (serverCommonList == null || serverCommonList.size() == 0) {
             return;
         }
@@ -373,7 +373,7 @@ public class ChartUtil {
         pieChart.invalidate();
     }
 
-    public static void updateTopBars(BaseTopInfo info, BarChart barChart, boolean drawValues) {
+    public synchronized static void updateTopBars(BaseTopInfo info, BarChart barChart, boolean drawValues) {
         List<IBarDataSet> barDataSets;
         if (barChart.getData() != null &&
                 barChart.getData().getDataSetCount() > 0) {
@@ -521,19 +521,7 @@ public class ChartUtil {
         });
     }
 
-    private static void setMillionsAxisFormatter(YAxis yAxis) {
-        yAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                float x = value / 1000000;
-                int y = Math.round(x);
-                String z = String.valueOf(y);
-                return z + "M";
-            }
-        });
-    }
-
-    public static void buildTable(ServerIoTopObjectKeeper serverIoTopObjectKeeper, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
+    public synchronized static void buildTable(ServerIoTopObjectKeeper serverIoTopObjectKeeper, ConstraintLayout clIoTop, TableLayout tlIotop, Context mContext) {
         if (clIoTop != null && clIoTop.getVisibility() == View.GONE) {
             clIoTop.setVisibility(View.VISIBLE);
         }
@@ -654,9 +642,7 @@ public class ChartUtil {
         colors[15] = Color.parseColor("#fdd835");
         if (size > 16) {
             int[] overColors = new int[size];
-            for (int i = 0; i < 16; i++) {
-                overColors[i] = colors[i];
-            }
+            System.arraycopy(colors, 0, overColors, 0, 16);
             for (int i = 16; i < size; i++) {
                 overColors[i] = Color.parseColor("#ef9a9a");
             }

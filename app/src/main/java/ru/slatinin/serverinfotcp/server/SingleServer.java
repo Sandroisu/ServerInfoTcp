@@ -3,18 +3,14 @@ package ru.slatinin.serverinfotcp.server;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import ru.slatinin.serverinfotcp.CallSqlQueryListener;
 import ru.slatinin.serverinfotcp.server.serverdf.ServerDFObjectKeeper;
 import ru.slatinin.serverinfotcp.server.serveriotop.ServerIoTopObjectKeeper;
-import ru.slatinin.serverinfotcp.server.servernet.ServerNet;
 import ru.slatinin.serverinfotcp.server.servernet.ServerNetObjectKeeper;
-import ru.slatinin.serverinfotcp.server.servernetlog.ServerNetLog;
 import ru.slatinin.serverinfotcp.server.servernetlog.ServerNetLogObjectKeeper;
-import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsql;
 import ru.slatinin.serverinfotcp.server.serverpsql.ServerPsqlObjectListKeeper;
-import ru.slatinin.serverinfotcp.server.servertop.ServerCommon;
 import ru.slatinin.serverinfotcp.server.servertop.ServerTOP;
 
 public class SingleServer {
@@ -35,8 +31,8 @@ public class SingleServer {
     public final ServerPsqlObjectListKeeper serverPsqlObjectListKeeper;
     public final List<String> dataInfoList;
 
-    public long time;
-    public String dataInfo;
+    public volatile long time;
+    public volatile String dataInfo;
 
     public SingleServer(String ip, String dataInfo) {
         this.ip = ip;
@@ -48,7 +44,7 @@ public class SingleServer {
         serverTOP = new ServerTOP();
         serverNetObjectKeeper = new ServerNetObjectKeeper();
         serverNetLogObjectKeeper = new ServerNetLogObjectKeeper();
-        dataInfoList = new ArrayList<>();
+        dataInfoList = Collections.synchronizedList(new ArrayList<>());
         dataInfoList.add(TOP);
         dataInfoList.add(NET);
         dataInfoList.add(NET_LOG);

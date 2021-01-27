@@ -11,7 +11,7 @@ public class ServerPsqlObjectKeeper {
     public final List<ServerPsql> serverPsqlList;
 
     public ServerPsqlObjectKeeper() {
-        serverPsqlList = new ArrayList<>();
+        serverPsqlList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public ServerPsqlObjectKeeper(ServerPsqlObjectKeeper keeper) {

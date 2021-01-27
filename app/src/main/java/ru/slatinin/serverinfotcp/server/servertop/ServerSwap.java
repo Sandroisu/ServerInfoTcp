@@ -25,20 +25,6 @@ public class ServerSwap extends BaseTopInfo{
         super();
     }
 
-    protected String getValueByName(String name){
-        switch (name){
-            case TOTAL:
-                return String.valueOf(total);
-            case USED:
-                return String.valueOf(used);
-            case FREE:
-                return String.valueOf(free);
-            case AVAIL_MEM:
-                return String.valueOf(avail_mem);
-        }
-        return "";
-    }
-
     @Override
     public String[] getFieldAsLabels() {
         String[] labels = new String[fields.size()];

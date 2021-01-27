@@ -14,7 +14,7 @@ public class ServerIoTopObjectKeeper {
 
     public ServerIoTopObjectKeeper() {
         firstIoTop = true;
-        serverIoTopList = new ArrayList<>();
+        serverIoTopList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void update(JsonObject[] objects) {
@@ -32,6 +32,7 @@ public class ServerIoTopObjectKeeper {
             for (int i = 0; i < objects.length; i++) {
                 serverIoTopList.set(i, new SingleIoTop(objects[i]));
             }
+            return;
         } else {
             serverIoTopList.clear();
             update(objects);

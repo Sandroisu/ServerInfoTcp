@@ -4,9 +4,9 @@ import com.google.gson.annotations.Expose;
 
 public class StringMapItem {
     @Expose
-    public int length;
+    public final int length;
     @Expose
-    public String name;
+    public final String name;
 
     public StringMapItem(String name, int length) {
         this.name = name;

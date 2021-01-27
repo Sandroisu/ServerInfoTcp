@@ -32,8 +32,8 @@ public class ServerTOP {
         serverCPU = new ServerCpu();
         serverMem = new ServerMem();
         serverSWAP = new ServerSwap();
-        serverProcesses = new ArrayList<>();
-        serverCommonList = new ArrayList<>();
+        serverProcesses = Collections.synchronizedList(new ArrayList<>());
+        serverCommonList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void update(JsonObject[] objects) {
@@ -73,9 +73,9 @@ public class ServerTOP {
             }
             for (int i = 0; i < objects.length; i++) {
                 if (i<temp.size()) {
-                    serverCommonList.set(i, new ServerCommon(JsonUtil.getJsonObject(objects[0], TOP)));
+                    serverCommonList.set(i, new ServerCommon(JsonUtil.getJsonObject(objects[i], TOP)));
                 }else {
-                    serverCommonList.add(new ServerCommon(JsonUtil.getJsonObject(objects[0], TOP)));
+                    serverCommonList.add(new ServerCommon(JsonUtil.getJsonObject(objects[i], TOP)));
                 }
             }
             Collections.reverse(serverCommonList);

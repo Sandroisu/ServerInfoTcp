@@ -33,28 +33,6 @@ public class ServerCpu extends BaseTopInfo{
         super();
     }
 
-    protected String getValueByName(String name){
-        switch (name){
-            case US:
-                return String.valueOf(us);
-            case SY:
-                return String.valueOf(sy);
-            case NI:
-                return String.valueOf(ni);
-            case ID:
-                return String.valueOf(id);
-            case WA:
-                return String.valueOf(wa);
-            case HI:
-                return String.valueOf(hi);
-            case SI:
-                return String.valueOf(si);
-            case ST:
-                return String.valueOf(st);
-        }
-        return "";
-    }
-
     @Override
     public String[] getFieldAsLabels() {
         String[] labels = new String[fields.size()];

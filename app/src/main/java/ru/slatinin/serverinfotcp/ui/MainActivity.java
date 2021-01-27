@@ -5,10 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,9 +24,10 @@ import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
-import ru.slatinin.serverinfotcp.server.SingleServer;
+import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoAdapter;
+import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoHolder;
 
-public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived, ServerInfoAdapter.OnServerInfoHolderClickListener, OnConnectAttempt {
+public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived, ServerInfoHolder.OnServerInfoHolderClickListener, OnConnectAttempt {
     public static final String SHARED_PREFS = "ru.slatinin.serverinfotcp.shared.prefs";
     public static final String ADDRESS = "ru.slatinin.serverinfotcp.address";
     public static final String PORT = "ru.slatinin.serverinfotcp.port";
@@ -46,7 +48,8 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         InfoHolder infoHolder = app.getInfoHolder();
         setContentView(R.layout.activity_main);
         recyclerView = findViewById(R.id.activity_main_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this));
+        ((SimpleItemAnimator) Objects.requireNonNull(recyclerView.getItemAnimator())).setSupportsChangeAnimations(false);
         serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleServerList(), this);
         recyclerView.setAdapter(serverInfoAdapter);
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
@@ -62,13 +65,17 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     }
 
     @Override
-    public void updateTcpInfo(SingleServer info) {
-        runOnUiThread(() -> serverInfoAdapter.notifyDataSetChanged());
+    public void updateTcpInfo(int position) {
+        runOnUiThread(() -> {
+            //serverInfoAdapter.notifyDataSetChanged();
+            serverInfoAdapter.notifyItemChanged(position);
+        });
     }
 
     @Override
     public void createTcpInfo(InfoHolder infoHolder) {
         runOnUiThread(() -> {
+            serverInfoAdapter = null;
             serverInfoAdapter = new ServerInfoAdapter(infoHolder.getSingleServerList(), MainActivity.this);
             recyclerView.setAdapter(serverInfoAdapter);
         });
@@ -82,6 +89,13 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
             tvError.setText(errorMessage);
             tvError.setVisibility(View.VISIBLE);
             Toast.makeText(MainActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    @Override
+    public void insertNewRvItem(int position) {
+        runOnUiThread(() -> {
+            serverInfoAdapter.notifyItemInserted(position);
         });
     }
 
@@ -136,8 +150,19 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public static class WrapContentLinearLayoutManager extends LinearLayoutManager {
+
+        public WrapContentLinearLayoutManager(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+            try {
+                super.onLayoutChildren(recycler, state);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

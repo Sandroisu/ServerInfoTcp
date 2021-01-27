@@ -6,7 +6,7 @@ import java.util.List;
 
 public class PackageReadUtils {
     private byte[] mAll;
-    private boolean mIsZip;
+    private final boolean mIsZip;
 
     public PackageReadUtils(byte[] bytes, boolean isZip) {
         mAll = bytes;

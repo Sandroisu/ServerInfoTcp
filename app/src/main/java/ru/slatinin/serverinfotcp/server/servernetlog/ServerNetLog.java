@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 
 import ru.slatinin.serverinfotcp.TimeUtil;
 import ru.slatinin.serverinfotcp.server.BaseServerInfo;
-import ru.slatinin.serverinfotcp.server.servernet.ServerNet;
 import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
 
 public class ServerNetLog extends BaseServerInfo {

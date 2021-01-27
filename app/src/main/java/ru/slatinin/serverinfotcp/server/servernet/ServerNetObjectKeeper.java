@@ -9,10 +9,10 @@ import java.util.List;
 public class ServerNetObjectKeeper {
 
     public final List<ServerNet> serverNetList;
-    public ServerNet lastServerNet;
+    public volatile ServerNet lastServerNet;
 
     public ServerNetObjectKeeper() {
-        serverNetList = new ArrayList<>();
+        serverNetList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void update(JsonObject[] objects) {
@@ -40,9 +40,5 @@ public class ServerNetObjectKeeper {
             serverNetList.addAll(temp);
             temp.clear();
         }
-    }
-
-    public ServerNet getLastNetObject() {
-        return serverNetList.get(serverNetList.size() - 1);
     }
 }
