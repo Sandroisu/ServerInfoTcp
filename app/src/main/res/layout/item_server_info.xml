@@ -51,7 +51,8 @@
         android:src="@drawable/ic_server_problem_signal_24"
         app:layout_constraintBottom_toBottomOf="@id/item_server_pdf"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/item_server_pdf" />
+        app:layout_constraintTop_toTopOf="@id/item_server_pdf"
+        android:contentDescription="@string/server_signal" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

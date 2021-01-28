@@ -25,7 +25,7 @@ public class ServerPsqlObjectListKeeper {
             serverPsqlObjectKeeperList.add(single);
             return;
         }
-        if (serverPsqlObjectKeeperList.size() > 8) {
+        if (serverPsqlObjectKeeperList.size() > 59) {
             serverPsqlObjectKeeperList.remove(0);
         }
         if (jsonObjects.length == psqlTabelsCount) {
@@ -38,7 +38,7 @@ public class ServerPsqlObjectListKeeper {
         if (jsonObjects.length < psqlTabelsCount) {
             return;
         }
-        int sizeToBeAdded = 8 - serverPsqlObjectKeeperList.size();
+        int sizeToBeAdded = 60 - serverPsqlObjectKeeperList.size();
         int maxJsonLength = (sizeToBeAdded) * psqlTabelsCount;
         if (maxJsonLength <= psqlTabelsCount) {
             return;

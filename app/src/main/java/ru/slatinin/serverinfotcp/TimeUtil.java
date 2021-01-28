@@ -29,7 +29,7 @@ public class TimeUtil{
             return formatMillisToMinutes(System.currentTimeMillis());
         }
         String newString = "";
-        Date date = null;
+        Date date;
         try {
             if (toBeFormatted.contains("T")){
                 toBeFormatted = toBeFormatted.replace("T", " ");

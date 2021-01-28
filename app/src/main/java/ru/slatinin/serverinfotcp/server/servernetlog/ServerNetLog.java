@@ -56,6 +56,8 @@ public class ServerNetLog extends BaseServerInfo {
         n_received = serverNetLog.n_received;
         n_rate = serverNetLog.n_rate;
         time = serverNetLog.time;
+        n_received_calculated = serverNetLog.n_received_calculated;
+        n_sent_calculated = serverNetLog.n_sent_calculated;
     }
 
     public void calculateValues(float oldReceived, float oldSent) {

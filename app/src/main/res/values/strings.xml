@@ -20,4 +20,7 @@
     <string name="net_log">NET-LOG</string>
     <string name="mb">MB</string>
     <string name="processes">Процессы</string>
+    <string name="download_pdf">Скачать pdf файл</string>
+    <string name="no_connection">Нет соединения с сетью</string>
+    <string name="server_signal">Сигнал с сервера</string>
 </resources>

@@ -9,15 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_pdf"
-        android:layout_centerInParent="true"/>
-
-    <ProgressBar
-        android:id="@+id/dc_progress"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:indeterminateDrawable="@drawable/custom_progress"
         android:layout_centerInParent="true"
-        android:visibility="gone"/>
+        android:contentDescription="@string/download_pdf" />
 
     <ImageView
         android:id="@+id/dc_no_connection"
@@ -25,5 +18,6 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_no_wifi"
         android:visibility="gone"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:contentDescription="@string/no_connection" />
 </RelativeLayout>

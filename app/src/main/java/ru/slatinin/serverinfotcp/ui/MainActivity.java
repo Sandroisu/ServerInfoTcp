@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
     @Override
     public void showError(String errorMessage) {
         runOnUiThread(() -> {
-            getSupportActionBar().setSubtitle("");
+            Objects.requireNonNull(getSupportActionBar()).setSubtitle("");
             tvError.setText(errorMessage);
             tvError.setVisibility(View.VISIBLE);
             Toast.makeText(MainActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
@@ -94,9 +94,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
 
     @Override
     public void insertNewRvItem(int position) {
-        runOnUiThread(() -> {
-            serverInfoAdapter.notifyItemInserted(position);
-        });
+        runOnUiThread(() -> serverInfoAdapter.notifyItemInserted(position));
     }
 
     @Override
@@ -120,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
 
     @Override
     public void onConnectAttempt(String address) {
-        getSupportActionBar().setSubtitle(address);
+        Objects.requireNonNull(getSupportActionBar()).setSubtitle(address);
         tvError.setVisibility(View.GONE);
     }
 

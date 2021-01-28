@@ -42,7 +42,7 @@ public class DownloadPdf {
                     FileOutputStream fileOutputStream = new FileOutputStream(file);
 
                     byte[] buffer = new byte[MEGABYTE];
-                    int bufferLength = 0;
+                    int bufferLength;
                     while ((bufferLength = inputStream.read(buffer)) > 0 && isRunning) {
                         fileOutputStream.write(buffer, 0, bufferLength);
                     }

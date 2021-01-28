@@ -20,7 +20,7 @@ import ru.slatinin.serverinfotcp.pack.RPCResult;
 public class TcpClient {
     public final String server_address;
     public final String server_port;
-    private OnMessageReceivedListener mMessageListener = null;
+    private OnMessageReceivedListener mMessageListener;
     private boolean mRun = false;
     private PrintWriter mBufferOut;
     private BufferedReader mBufferIn;
@@ -97,11 +97,12 @@ public class TcpClient {
                         if (mMessageListener != null) {
                             if (retry == 0) {
                                 mMessageListener.onErrorOccurred("Проблема при чтении входящего потока");
-                            } else {
-                                sendMessage("Hello, World!!!");
                             }
                         }
-                        retry = 1;
+                        if (retry < 10) {
+                            sendMessage("Hello, World!!!");
+                        }
+                        retry++;
                     }
 
                 }
@@ -114,7 +115,8 @@ public class TcpClient {
                 socket.close();
             }
 
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             if (mMessageListener != null) {
                 mMessageListener.onErrorOccurred(getStackTrace(e));
             }

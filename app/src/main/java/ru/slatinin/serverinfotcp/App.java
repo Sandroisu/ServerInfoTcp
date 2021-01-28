@@ -73,6 +73,11 @@ public class App extends Application implements CallSqlQueryListener {
             tcpClient = new TcpClient(address, port, new TcpClient.OnMessageReceivedListener() {
                 @Override
                 public synchronized void onServerMessageReceived(JsonObject[] objects, String ip, String dataInfo) {
+                    if (dataInfo.equals(PSQL)){
+                        for (OnTcpInfoReceived listener : listenersList) {
+                            listener.showError(PSQL);
+                        }
+                    }
                     if (objects == null || objects.length == 0) {
                         return;
                     }
@@ -192,7 +197,7 @@ public class App extends Application implements CallSqlQueryListener {
                 break;
             case PSQL:
                 databaseName = "dbo.cd_psql";
-                limit = "40";
+                limit = "1000";
                 break;
             case IOTOP:
                 databaseName = "dbo.cd_iotop";

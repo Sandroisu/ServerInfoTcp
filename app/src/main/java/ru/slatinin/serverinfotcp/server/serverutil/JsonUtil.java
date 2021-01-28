@@ -15,7 +15,9 @@ public class JsonUtil {
             }
         }else {
             try {
-                array = object.getAsJsonArray();
+                if (object != null) {
+                    array = object.getAsJsonArray();
+                }
             }catch (UnsupportedOperationException e){
                 e.printStackTrace();
             }
