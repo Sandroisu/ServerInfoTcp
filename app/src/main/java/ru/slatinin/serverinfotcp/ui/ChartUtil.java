@@ -256,6 +256,7 @@ public class ChartUtil {
             dataSets.add(set);
         }
         LineData data = new LineData(dataSets);
+        /*
         chart.getXAxis().setLabelCount(labels.length + 1, true);
         chart.getXAxis().setValueFormatter(new ValueFormatter() {
             @Override
@@ -271,6 +272,9 @@ public class ChartUtil {
             }
         });
         chart.getXAxis().setCenterAxisLabels(true);
+
+         */
+        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         chart.getLegend().setWordWrapEnabled(true);
         chart.setData(data);
         chart.invalidate();
@@ -541,7 +545,7 @@ public class ChartUtil {
             name.setText(text);
             name.setLayoutParams(layoutParams);
             name.setPadding(0, 0, 1, 0);
-            name.setTextSize(12);
+            name.setTextSize(10);
             namesRow.addView(name);
         }
         tlIotop.addView(namesRow);
@@ -564,7 +568,7 @@ public class ChartUtil {
                     value.setBackground(ContextCompat.getDrawable(mContext, R.drawable.border));
                     String text = values.get(j) + " ";
                     value.setText(text);
-                    value.setTextSize(12);
+                    value.setTextSize(10);
                     valueRow.addView(value);
                 }
                 tlIotop.addView(valueRow);
