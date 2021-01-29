@@ -48,4 +48,11 @@ public class TcpService extends Service {
         }
         return Service.START_NOT_STICKY;
     }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        this.stopSelf();
+    }
+
 }

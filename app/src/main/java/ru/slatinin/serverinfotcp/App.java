@@ -36,6 +36,7 @@ public class App extends Application implements CallSqlQueryListener {
 
     private InfoHolder infoHolder;
     private TcpClient tcpClient;
+    private TcpService tcpService;
     private ArrayList<OnTcpInfoReceived> listenersList;
 
     @Override
