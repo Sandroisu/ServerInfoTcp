@@ -27,7 +27,7 @@ import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoAdapter;
 import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoHolder;
 
-public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived, ServerInfoHolder.OnServerInfoHolderClickListener, OnConnectAttempt {
+public class MainActivity extends BaseActivity implements OnTcpInfoReceived, ServerInfoHolder.OnServerInfoHolderClickListener, OnConnectAttempt {
     public static final String SHARED_PREFS = "ru.slatinin.serverinfotcp.shared.prefs";
     public static final String ADDRESS = "ru.slatinin.serverinfotcp.address";
     public static final String PORT = "ru.slatinin.serverinfotcp.port";
@@ -163,4 +163,5 @@ public class MainActivity extends AppCompatActivity implements OnTcpInfoReceived
             }
         }
     }
+
 }

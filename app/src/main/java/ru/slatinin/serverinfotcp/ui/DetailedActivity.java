@@ -41,7 +41,7 @@ import static ru.slatinin.serverinfotcp.server.SingleServer.PSQL;
 import static ru.slatinin.serverinfotcp.server.SingleServer.TOP;
 
 
-public class DetailedActivity extends AppCompatActivity implements OnTcpInfoReceived, ViewTreeObserver.OnGlobalLayoutListener, OnConnectAttempt {
+public class DetailedActivity extends BaseActivity implements OnTcpInfoReceived, ViewTreeObserver.OnGlobalLayoutListener, OnConnectAttempt {
 
     private LineChart lcNet;
     private LineChart lcNetLog;

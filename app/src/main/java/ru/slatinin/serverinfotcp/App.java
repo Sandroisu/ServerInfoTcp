@@ -3,10 +3,13 @@ package ru.slatinin.serverinfotcp;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.IBinder;
 
 import com.google.gson.JsonObject;
 
@@ -48,6 +51,17 @@ public class App extends Application implements CallSqlQueryListener {
                     "TcpClientChannel", NotificationManager.IMPORTANCE_DEFAULT);
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
         }
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                tcpService = ((TcpService.Binder) service).getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                tcpService = null;
+            }
+        };
         infoHolder = new InfoHolder(this);
         listenersList = new ArrayList<>();
         Intent intent = new Intent();
@@ -57,6 +71,8 @@ public class App extends Application implements CallSqlQueryListener {
         } else {
             startService(intent);
         }
+        bindService(new Intent(getApplicationContext(), TcpService.class)
+                , serviceConnection, BIND_AUTO_CREATE);
     }
 
     public void connect(String address, String port) {
@@ -216,6 +232,20 @@ public class App extends Application implements CallSqlQueryListener {
     public void firstTimeInserted(int position) {
         for (OnTcpInfoReceived listener : listenersList) {
             listener.insertNewRvItem(position);
+        }
+    }
+
+    public void stopTcpService() {
+        if (listenersList.size() != 0) {
+            return;
+        }
+        if (tcpClient != null) {
+            tcpClient.stopClient();
+            infoHolder.clear();
+            tcpClient = null;
+        }
+        if (tcpService != null) {
+            tcpService.stopSelf();
         }
     }
 

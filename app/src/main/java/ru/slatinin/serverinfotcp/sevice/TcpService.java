@@ -13,7 +13,8 @@ import ru.slatinin.serverinfotcp.App;
 import static androidx.core.app.NotificationCompat.PRIORITY_DEFAULT;
 
 public class TcpService extends Service {
-    private volatile TcpClient tcpClient;
+    private TcpClient tcpClient;
+    private Binder binder;
 
     public final static String NOTIFICATION_CHANEL_ID = "tcpService";
 
@@ -21,12 +22,13 @@ public class TcpService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        binder = new Binder();
         Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID).setContentTitle("TcpClient")
                 .setContentText("Фоновый режим запущен").setPriority(PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE).build();
@@ -52,7 +54,13 @@ public class TcpService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
+        stopForeground(true);
         this.stopSelf();
     }
 
+    public class Binder extends android.os.Binder {
+        public TcpService getService() {
+            return TcpService.this;
+        }
+    }
 }
