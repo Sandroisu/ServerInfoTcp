@@ -407,9 +407,11 @@ public class ChartUtil {
         BarData data = new BarData(barDataSets);
         data.setValueTextSize(8f);
         data.setDrawValues(drawValues);
+        boolean isNotServerCpu = true;
         if (info instanceof ServerCpu) {
-
-        } else {
+            isNotServerCpu = false;
+        }
+        if (isNotServerCpu){
             setGbMemoryAxisFormatter(barChart.getAxisLeft());
         }
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -68,7 +69,7 @@ public class DownloadPdfView extends RelativeLayout implements DownloadPdf.OnDow
             } else {
                 ivNoConnection.setVisibility(VISIBLE);
                 ivPdf.setVisibility(GONE);
-                Handler handler = new Handler();
+                Handler handler = new Handler(Looper.getMainLooper());
                 handler.postDelayed(() -> {
                     ivNoConnection.setVisibility(GONE);
                     ivPdf.setVisibility(VISIBLE);

@@ -2,6 +2,7 @@ package ru.slatinin.serverinfotcp.ui.adapter;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -63,7 +64,7 @@ public class ServerInfoHolder extends RecyclerView.ViewHolder implements View.On
     protected void bind(SingleServer info) {
         tvTime.setText(TimeUtil.formatMillisToHours(info.time));
         ivSignal.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_server_ok_signal_24));
-        Handler handler = new Handler();
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> listener.onRedSignal(ivSignal), 1000);
         if (ip == null) {
             ip = info.ip;

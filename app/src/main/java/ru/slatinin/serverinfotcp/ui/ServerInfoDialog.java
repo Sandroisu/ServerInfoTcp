@@ -71,7 +71,7 @@ public class ServerInfoDialog extends DialogFragment {
         if (!port.isEmpty()) {
             serverPort.setText(port);
         }else {
-            serverPort.setText("3981");
+            serverPort.setText(getResources().getString(R.string.default_port));
         }
         accept.setOnClickListener(v1 -> {
             if (serverAddress.getText().toString().isEmpty()) {

@@ -37,6 +37,7 @@
         android:layout_height="wrap_content"
         android:gravity="end"
         android:paddingEnd="4dp"
+        android:paddingStart="0dp"
         android:textColor="@color/hint"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@id/item_server_pdf"
@@ -138,7 +139,8 @@
             android:textSize="10sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_server_net_title"
-            tools:text="Информация о net" />
+            tools:text="Информация о net"
+            tools:ignore="SmallSp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -14,7 +14,6 @@
     <string name="mem">MEM</string>
     <string name="top">TOP</string>
     <string name="level">Level</string>
-    <string name="pdf">pdf</string>
     <string name="iotop">IOTOP</string>
     <string name="choose_disk">Выберите диск</string>
     <string name="net_log">NET-LOG</string>
@@ -23,4 +22,5 @@
     <string name="download_pdf">Скачать pdf файл</string>
     <string name="no_connection">Нет соединения с сетью</string>
     <string name="server_signal">Сигнал с сервера</string>
+    <string name="default_port">3981</string>
 </resources>
