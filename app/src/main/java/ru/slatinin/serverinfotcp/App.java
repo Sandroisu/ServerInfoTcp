@@ -14,6 +14,8 @@ import android.os.IBinder;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import ru.slatinin.serverinfotcp.server.InfoHolder;
 import ru.slatinin.serverinfotcp.server.serverutil.JsonUtil;
@@ -41,10 +43,12 @@ public class App extends Application implements CallSqlQueryListener {
     private TcpClient tcpClient;
     private TcpService tcpService;
     private ArrayList<OnTcpInfoReceived> listenersList;
+    private ArrayList<String> lastJsons;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        lastJsons = new ArrayList<>(7);
         NotificationChannel channel;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channel = new NotificationChannel(TcpService.NOTIFICATION_CHANEL_ID,
@@ -126,6 +130,14 @@ public class App extends Application implements CallSqlQueryListener {
                             break;
                     }
                     if (position >= 0) {
+                        if (lastJsons.size() > 6) {
+                            lastJsons.remove(0);
+                        }
+                        StringBuilder current = new StringBuilder("-------" + dataInfo + "-------  Время: " + TimeUtil.formatMillisToHours(System.currentTimeMillis()) + "\n");
+                        for (JsonObject object : objects) {
+                            current.append(object.toString()).append("\n");
+                        }
+                        lastJsons.add(current.toString());
                         for (OnTcpInfoReceived listener : listenersList) {
                             listener.updateTcpInfo(position);
                         }
@@ -190,6 +202,14 @@ public class App extends Application implements CallSqlQueryListener {
         listenersList.remove(listener);
     }
 
+    public String getLastJsons() {
+        StringBuilder json = new StringBuilder();
+        for (int i = lastJsons.size() - 1; i >= 0; i--) {
+            json.append(lastJsons.get(i)).append("\n");
+        }
+        return json.toString();
+    }
+
     @Override
     public synchronized void onMustCallOldData(String dataInfo, String ip) {
         String databaseName = "";
@@ -245,7 +265,9 @@ public class App extends Application implements CallSqlQueryListener {
             tcpClient = null;
         }
         if (tcpService != null) {
+            tcpService.stopForeground(true);
             tcpService.stopSelf();
+
         }
     }
 

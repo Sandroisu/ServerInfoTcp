@@ -144,6 +144,10 @@ public class MainActivity extends BaseActivity implements OnTcpInfoReceived, Ser
             });
             thread.start();
         }
+        if (item.getItemId() == R.id.main_menu_json) {
+            JsonInfoDialog jsonInfoDialog = new JsonInfoDialog();
+            jsonInfoDialog.show(getSupportFragmentManager(), "last_json");
+        }
         return super.onOptionsItemSelected(item);
     }
 

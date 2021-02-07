@@ -21,7 +21,7 @@ public class ServerNetLogObjectKeeper {
             serverNetLogList.add(new ServerNetLog(objects[0]));
             return;
         }
-        if (serverNetLogList.size() > 0 && serverNetLogList.size() < 10) {
+        if (serverNetLogList.size() < 10) {
             List<ServerNetLog> temp = new ArrayList<>(serverNetLogList.size());
             for (int i = 0; i < serverNetLogList.size(); i++) {
                 temp.add(new ServerNetLog(serverNetLogList.get(i)));

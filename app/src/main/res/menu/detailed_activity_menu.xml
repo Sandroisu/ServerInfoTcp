@@ -2,15 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/main_menu_reconnect"
-        android:title="@string/reconnect"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/main_menu_send"
-        android:title="@string/send"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/main_menu_json"
         android:title="@string/show_last_json"
         app:showAsAction="never" />

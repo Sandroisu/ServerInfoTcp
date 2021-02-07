@@ -1,6 +1,8 @@
 package ru.slatinin.serverinfotcp.ui;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -327,7 +329,18 @@ public class DetailedActivity extends BaseActivity implements OnTcpInfoReceived,
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }
+        if (item.getItemId() == R.id.main_menu_json) {
+            JsonInfoDialog jsonInfoDialog = new JsonInfoDialog();
+            jsonInfoDialog.show(getSupportFragmentManager(), "last_json");
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.detailed_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
 }

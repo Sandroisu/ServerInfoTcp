@@ -23,4 +23,6 @@
     <string name="no_connection">Нет соединения с сетью</string>
     <string name="server_signal">Сигнал с сервера</string>
     <string name="default_port">3981</string>
+    <string name="close">Закрыть</string>
+    <string name="show_last_json">Посмотреть последние json</string>
 </resources>
