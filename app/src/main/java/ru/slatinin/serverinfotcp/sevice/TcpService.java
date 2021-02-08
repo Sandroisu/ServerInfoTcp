@@ -54,6 +54,10 @@ public class TcpService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
+        if (tcpClient != null) {
+            tcpClient.stopClient();
+            tcpClient = null;
+        }
         stopForeground(true);
         this.stopSelf();
     }

@@ -33,8 +33,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
-            android:name=".sevice.TcpService"
-            android:stopWithTask="true" />
+            android:name=".sevice.TcpService"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
