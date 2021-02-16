@@ -40,23 +40,20 @@ public class TcpService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID).setContentTitle("TcpClient")
-                .setContentText("Фоновый режим запущен").setPriority(PRIORITY_DEFAULT)
-                .setCategory(NotificationCompat.CATEGORY_SERVICE).build();
-        startForeground(1411, notification);
-        App app = (App) getApplication();
-        if (tcpClient == null) {
-            tcpClient = app.getTcpClient();
-        }
+
         return Service.START_NOT_STICKY;
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
+        App app = (App) getApplication();
         if (tcpClient != null) {
             tcpClient.stopClient();
             tcpClient = null;
+        }
+        if (app.getInfoHolder()!=null){
+            app.getInfoHolder().clear();
         }
         stopForeground(true);
         this.stopSelf();

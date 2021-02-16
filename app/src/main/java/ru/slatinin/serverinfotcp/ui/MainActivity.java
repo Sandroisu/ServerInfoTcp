@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import ru.slatinin.serverinfotcp.App;
 import ru.slatinin.serverinfotcp.R;
 import ru.slatinin.serverinfotcp.sevice.TcpClient;
 import ru.slatinin.serverinfotcp.server.InfoHolder;
+import ru.slatinin.serverinfotcp.sevice.TcpService;
 import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoAdapter;
 import ru.slatinin.serverinfotcp.ui.adapter.ServerInfoHolder;
 
@@ -54,6 +56,13 @@ public class MainActivity extends BaseActivity implements OnTcpInfoReceived, Ser
         ServerInfoDialog serverInfoDialog = new ServerInfoDialog(this);
         serverInfoDialog.show(getSupportFragmentManager(), "server_address_dialog");
         tvError = findViewById(R.id.activity_main_error);
+        Intent intent = new Intent();
+        intent.setClass(this, TcpService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 
     @Override

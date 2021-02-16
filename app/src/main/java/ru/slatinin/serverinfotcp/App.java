@@ -41,7 +41,6 @@ public class App extends Application implements CallSqlQueryListener {
 
     private InfoHolder infoHolder;
     private TcpClient tcpClient;
-    private TcpService tcpService;
     private ArrayList<OnTcpInfoReceived> listenersList;
     private ArrayList<String> lastJsons;
 
@@ -55,28 +54,8 @@ public class App extends Application implements CallSqlQueryListener {
                     "TcpClientChannel", NotificationManager.IMPORTANCE_DEFAULT);
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
         }
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                tcpService = ((TcpService.Binder) service).getService();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                tcpService = null;
-            }
-        };
         infoHolder = new InfoHolder(this);
         listenersList = new ArrayList<>();
-        Intent intent = new Intent();
-        intent.setClass(this, TcpService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent);
-        } else {
-            startService(intent);
-        }
-        bindService(new Intent(getApplicationContext(), TcpService.class)
-                , serviceConnection, BIND_AUTO_CREATE);
     }
 
     public void connect(String address, String port) {
@@ -243,7 +222,7 @@ public class App extends Application implements CallSqlQueryListener {
         }
         if (tcpClient != null) {
             String query = "[sql " + dataInfo + " " + ip + "] select * from " + databaseName
-                    + " where c_ip = '" + ip + "' order by id desc limit " + limit;
+                    + " where c_ip = '" + ip + "' order by id desc limit " + limit +";\n";
             tcpClient.sendMessage(query);
         }
     }
@@ -254,21 +233,4 @@ public class App extends Application implements CallSqlQueryListener {
             listener.insertNewRvItem(position);
         }
     }
-
-    public void stopTcpService() {
-        if (listenersList.size() != 0) {
-            return;
-        }
-        if (tcpClient != null) {
-            tcpClient.stopClient();
-            infoHolder.clear();
-            tcpClient = null;
-        }
-        if (tcpService != null) {
-            tcpService.stopForeground(true);
-            tcpService.stopSelf();
-
-        }
-    }
-
 }

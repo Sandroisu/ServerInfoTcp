@@ -249,7 +249,7 @@ public class DetailedActivity extends BaseActivity implements OnTcpInfoReceived,
     }
 
     private void updatePsql(ServerPsqlObjectListKeeper serverPsqlObjectListKeeper) {
-        if (serverPsqlObjectListKeeper == null || serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.size() == 0
+        if (serverPsqlObjectListKeeper == null || serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.size() <=1
                 || serverPsqlObjectListKeeper.serverPsqlObjectKeeperList.get(0).serverPsqlList.size() == 0) {
             return;
         }
@@ -280,7 +280,7 @@ public class DetailedActivity extends BaseActivity implements OnTcpInfoReceived,
     }
 
     private void updateNetLog(List<ServerNetLog> serverNetLogs) {
-        if (serverNetLogs.size() == 0) {
+        if (serverNetLogs.size() <= 1) {
             return;
         }
         if (clNetLog.getVisibility() == View.GONE) {
